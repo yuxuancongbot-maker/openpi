@@ -27,6 +27,7 @@ import openpi.training.misc.polaris_config as polaris_config
 import openpi.training.misc.roboarena_config as roboarena_config
 import openpi.training.optimizer as _optimizer
 import openpi.training.weight_loaders as weight_loaders
+import openpi.shared.nnx_utils as nnx_utils
 import openpi.transforms as _transforms
 
 ModelType: TypeAlias = _model.ModelType
@@ -964,6 +965,40 @@ _CONFIGS = [
         overwrite=True,
         exp_name="debug_pi05",
         wandb_enabled=False,
+    ),
+    #
+    # π0.5 + L1 Flow fine-tuning on LIBERO
+    # Freeze VLM backbone, only train action expert (L1 Flow modified)
+    # Uses pi05_libero (LIBERO-finetuned) checkpoint instead of pi05_base for better initialization.
+    #
+    TrainConfig(
+        name="pi05_libero_l1_flow",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_horizon=10,
+            discrete_state_input=False,
+            l1_flow=True,  # Enable L1 Flow: predict x1, use L1 loss, 2-step inference
+        ),
+        data=LeRobotLiberoDataConfig(
+            repo_id="physical-intelligence/libero",
+            base_config=DataConfig(prompt_from_task=True),
+            extra_delta_transform=False,
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=5e-5,
+            decay_steps=1_000_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        # Initialize from LIBERO-finetuned pi0.5 checkpoint (action expert already adapted to LIBERO).
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        num_train_steps=30_000,
+        # Freeze everything except action expert (llm_1).
+        # ".*llm.*_1.*" matches action expert params; Not(...) matches everything else → frozen.
+        freeze_filter=nnx.Not(nnx_utils.PathRegex(".*llm.*_1.*")),
     ),
     # RoboArena & PolaRiS configs.
     *roboarena_config.get_roboarena_configs(),

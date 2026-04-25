@@ -16,6 +16,43 @@ from openpi.shared import array_typing as at
 logger = logging.getLogger("openpi")
 
 
+class MixedTimestepSampler:
+    """
+    Mixed LogisticNormal + Uniform distribution for L1 Flow training.
+    Emphasizes intermediate timesteps while ensuring non-zero probability at boundaries.
+    """
+
+    def __init__(self, alpha=0.99):
+        self.alpha = alpha
+
+    def __eq__(self, other):
+        return isinstance(other, MixedTimestepSampler) and self.alpha == other.alpha
+
+    def __hash__(self):
+        return hash(("MixedTimestepSampler", self.alpha))
+
+    def sample(self, rng, batch_shape):
+        mask_rng, logistic_rng, uniform_rng = jax.random.split(rng, 3)
+
+        # Mask: which samples use LogisticNormal vs Uniform
+        use_logistic = jax.random.uniform(mask_rng, shape=batch_shape) < self.alpha
+
+        # LogisticNormal: sigmoid(N(0,1)) — concentrated around 0.3~0.7
+        x = jax.random.normal(logistic_rng, shape=batch_shape)
+        logistic_t = jax.nn.sigmoid(x)
+
+        # Uniform: flat over [0, 1]
+        uniform_t = jax.random.uniform(uniform_rng, shape=batch_shape)
+
+        # Select per-sample
+        t = jnp.where(use_logistic, logistic_t, uniform_t)
+        return t, rng
+
+
+def _get_l1_flow_sampler():
+    return MixedTimestepSampler(alpha=0.99)
+
+
 def make_attn_mask(input_mask, mask_ar):
     """Adapted from big_vision.
 
@@ -67,6 +104,9 @@ class Pi0(_model.BaseModel):
     def __init__(self, config: pi0_config.Pi0Config, rngs: nnx.Rngs):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
         self.pi05 = config.pi05
+        self.l1_flow = config.l1_flow
+        if self.l1_flow:
+            self._timestep_sampler = _get_l1_flow_sampler()
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
         # TODO: rewrite gemma in NNX. For now, use bridge.
@@ -194,10 +234,19 @@ class Pi0(_model.BaseModel):
 
         batch_shape = actions.shape[:-2]
         noise = jax.random.normal(noise_rng, actions.shape)
-        time = jax.random.beta(time_rng, 1.5, 1, batch_shape) * 0.999 + 0.001
+        if self.l1_flow:
+            time, _ = self._timestep_sampler.sample(time_rng, batch_shape)
+        else:
+            time = jax.random.beta(time_rng, 1.5, 1, batch_shape) * 0.999 + 0.001
         time_expanded = time[..., None, None]
-        x_t = time_expanded * noise + (1 - time_expanded) * actions
-        u_t = noise - actions
+        # L1 Flow: t=0 is noise, t=1 is clean (matches original L1Flow convention)
+        # Standard FM: t=1 is noise, t=0 is clean
+        if self.l1_flow:
+            x_t = time_expanded * actions + (1 - time_expanded) * noise
+        else:
+            x_t = time_expanded * noise + (1 - time_expanded) * actions
+        # L1 Flow: predict x1 (sample), not velocity (noise - actions)
+        u_t = actions if self.l1_flow else noise - actions
 
         # one big forward pass of prefix + suffix at once
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
@@ -211,6 +260,9 @@ class Pi0(_model.BaseModel):
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
+        # L1 Flow: use L1 loss on sample space; otherwise MSE on velocity
+        if self.l1_flow:
+            return jnp.mean(jnp.abs(v_t - u_t), axis=-1)
         return jnp.mean(jnp.square(v_t - u_t), axis=-1)
 
     @override
@@ -225,7 +277,6 @@ class Pi0(_model.BaseModel):
         observation = _model.preprocess_observation(None, observation, train=False)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
-        dt = -1.0 / num_steps
         batch_size = observation.state.shape[0]
         if noise is None:
             noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
@@ -235,6 +286,12 @@ class Pi0(_model.BaseModel):
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
         _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+
+        # L1 Flow 2-step inference (NFE=2)
+        if self.l1_flow:
+            return self._l1_flow_sample(observation, noise, batch_size, prefix_tokens, prefix_mask, kv_cache)
+
+        dt = -1.0 / num_steps
 
         def step(carry):
             x_t, time = carry
@@ -277,3 +334,44 @@ class Pi0(_model.BaseModel):
 
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
+
+    def _l1_flow_sample(self, observation, x0, batch_size, prefix_tokens, prefix_mask, kv_cache):
+        """
+        L1 Flow 2-step inference:
+        Step 1: From x0 (t=1, pure noise), predict x1 at t=0, compute velocity,
+                take Euler step to t=0.5 → x_mid
+        Step 2: From x_mid at t=0.5, directly predict x1
+        """
+
+        def _denoise(x_t, t):
+            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+                observation, x_t, jnp.broadcast_to(t, batch_size)
+            )
+            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+            prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+            positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+            (_, suffix_out), _ = self.PaliGemma.llm(
+                [None, suffix_tokens],
+                mask=full_attn_mask,
+                positions=positions,
+                kv_cache=kv_cache,
+                adarms_cond=[None, adarms_cond],
+            )
+            return self.action_out_proj(suffix_out[:, -self.action_horizon :])
+
+        # Step 1: Predict x1 at t=0 from pure noise
+        t0 = jnp.zeros(batch_size)
+        x1_pred_coarse = _denoise(x0, t0)
+
+        # Velocity at t=0: v = (x1_pred - x0) / (1 - 0) = x1_pred - x0
+        v_t0 = x1_pred_coarse - x0
+
+        # Euler step to t=0.5: x_0.5 = x0 + 0.5 * v
+        x_mid = x0 + 0.5 * v_t0
+
+        # Step 2: From x_mid at t=0.5, directly predict x1
+        t_mid = jnp.full((batch_size,), 0.5)
+        x1_final = _denoise(x_mid, t_mid)
+
+        return x1_final

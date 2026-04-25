@@ -49,6 +49,38 @@ def sample_beta(alpha, beta, bsize, device):
     return dist.sample((bsize,))
 
 
+class MixedTimestepSampler:
+    """
+    Mixed LogisticNormal + Uniform distribution for L1 Flow training.
+    Emphasizes intermediate timesteps while ensuring non-zero probability at boundaries.
+    """
+
+    def __init__(self, alpha=0.99, device="cuda"):
+        self.alpha = alpha
+        self.device = device
+        self.logistic_normal = torch.distributions.LogisticNormal(
+            torch.tensor([0.0], device=device),
+            torch.tensor([1.0], device=device),
+        )
+
+    def sample(self, bsize):
+        t = torch.zeros(bsize, device=self.device)
+        use_logistic = torch.rand(bsize, device=self.device) < self.alpha
+
+        # LogisticNormal part: ~sigmoid(N(0,1)) → concentrated in [0.3, 0.7]
+        n_logistic = use_logistic.sum().item()
+        if n_logistic > 0:
+            x = torch.randn(n_logistic, device=self.device)
+            t[use_logistic] = torch.sigmoid(x)
+
+        # Uniform part
+        n_uniform = (~use_logistic).sum().item()
+        if n_uniform > 0:
+            t[~use_logistic] = torch.rand(n_uniform, device=self.device)
+
+        return t
+
+
 def make_att_2d_masks(pad_masks, att_masks):
     """Copied from big_vision.
 
@@ -86,6 +118,11 @@ class PI0Pytorch(nn.Module):
         super().__init__()
         self.config = config
         self.pi05 = config.pi05
+        self.l1_flow = getattr(config, "l1_flow", False)
+
+        # L1 Flow: use mixed timestep sampler
+        if self.l1_flow:
+            self.timestep_sampler = MixedTimestepSampler(alpha=0.99, device="cuda")
 
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
@@ -180,6 +217,9 @@ class PI0Pytorch(nn.Module):
         )
 
     def sample_time(self, bsize, device):
+        if self.l1_flow and hasattr(self, "timestep_sampler"):
+            t = self.timestep_sampler.sample(bsize)
+            return t.to(dtype=torch.float32, device=device)
         time_beta = sample_beta(1.5, 1.0, bsize, device)
         time = time_beta * 0.999 + 0.001
         return time.to(dtype=torch.float32, device=device)
@@ -325,8 +365,14 @@ class PI0Pytorch(nn.Module):
             time = self.sample_time(actions.shape[0], actions.device)
 
         time_expanded = time[:, None, None]
-        x_t = time_expanded * noise + (1 - time_expanded) * actions
-        u_t = noise - actions
+        # L1 Flow: t=0 is noise, t=1 is clean (matches original L1Flow convention)
+        # Standard FM: t=1 is noise, t=0 is clean
+        if self.l1_flow:
+            x_t = time_expanded * actions + (1 - time_expanded) * noise
+        else:
+            x_t = time_expanded * noise + (1 - time_expanded) * actions
+        # L1 Flow: predict x1 (sample), not velocity (noise - actions)
+        u_t = actions if self.l1_flow else noise - actions
 
         prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(images, img_masks, lang_tokens, lang_masks)
         suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(state, x_t, time)
@@ -371,6 +417,9 @@ class PI0Pytorch(nn.Module):
 
         v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
 
+        # L1 Flow: use L1 loss on sample space; otherwise MSE on velocity
+        if self.l1_flow:
+            return F.l1_loss(v_t, u_t, reduction="none")
         return F.mse_loss(u_t, v_t, reduction="none")
 
     @torch.no_grad()
@@ -399,6 +448,10 @@ class PI0Pytorch(nn.Module):
             use_cache=True,
         )
 
+        # L1 Flow 2-step inference (NFE=2)
+        if self.l1_flow:
+            return self._l1_flow_sample(state, prefix_pad_masks, past_key_values, noise, bsize, device)
+
         dt = -1.0 / num_steps
         dt = torch.tensor(dt, dtype=torch.float32, device=device)
 
@@ -418,6 +471,33 @@ class PI0Pytorch(nn.Module):
             x_t = x_t + dt * v_t
             time += dt
         return x_t
+
+    def _l1_flow_sample(self, state, prefix_pad_masks, past_key_values, x0, bsize, device):
+        """
+        L1 Flow 2-step inference:
+        Step 1: From x0 (t=1, pure noise), predict x1 at t=0, compute velocity,
+                take Euler step to t=0.5 → x_mid
+        Step 2: From x_mid at t=0.5, directly predict x1
+        """
+        # Step 1: Predict x1 at t=0 from pure noise
+        t0 = torch.zeros(bsize, device=device, dtype=torch.float32)
+        x1_pred_coarse = self.denoise_step(
+            state, prefix_pad_masks, past_key_values, x0, t0
+        )
+
+        # Velocity at t=0: v = (x1_pred - x0) / (1 - 0) = x1_pred - x0
+        v_t0 = x1_pred_coarse - x0
+
+        # Euler step to t=0.5: x_0.5 = x0 + 0.5 * v
+        x_mid = x0 + 0.5 * v_t0
+
+        # Step 2: From x_mid at t=0.5, directly predict x1
+        t_mid = torch.full((bsize,), 0.5, device=device, dtype=torch.float32)
+        x1_final = self.denoise_step(
+            state, prefix_pad_masks, past_key_values, x_mid, t_mid
+        )
+
+        return x1_final
 
     def denoise_step(
         self,

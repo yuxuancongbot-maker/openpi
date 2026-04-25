@@ -29,6 +29,8 @@ class Pi0Config(_model.BaseModelConfig):
     # - the state input is part of the discrete language tokens rather than a continuous input that is part of the suffix
     # - the action expert uses adaRMSNorm to inject the flow matching timestep
     pi05: bool = False
+    # L1 Flow: predict x1 (sample) instead of velocity, use L1 loss, 2-step inference
+    l1_flow: bool = False
     # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
     discrete_state_input: bool = None  # type: ignore
 
