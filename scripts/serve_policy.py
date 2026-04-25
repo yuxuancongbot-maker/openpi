@@ -1,8 +1,10 @@
 import dataclasses
 import enum
 import logging
+import os
 import socket
 
+import torch
 import tyro
 
 from openpi.policies import policy as _policy
@@ -89,9 +91,19 @@ def create_policy(args: Args) -> _policy.Policy:
     """Create a policy from the given arguments."""
     match args.policy:
         case Checkpoint():
-            return _policy_config.create_trained_policy(
+            policy = _policy_config.create_trained_policy(
                 _config.get_config(args.policy.config), args.policy.dir, default_prompt=args.default_prompt
             )
+            # Auto-load trained router weights if present
+            router_path = os.path.join(args.policy.dir, "router_weights.pt")
+            if os.path.exists(router_path):
+                if hasattr(policy._model, "router") and policy._model.router is not None:
+                    state = torch.load(router_path, map_location="cpu")
+                    policy._model.router.load_state_dict(state)
+                    logging.info("Loaded trained router weights from %s", router_path)
+                else:
+                    logging.warning("router_weights.pt found but model has no router; ignoring.")
+            return policy
         case Default():
             return create_default_policy(args.env, default_prompt=args.default_prompt)
 

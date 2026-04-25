@@ -162,14 +162,6 @@ class PI0Pytorch(nn.Module):
         # Initialize gradient checkpointing flag
         self.gradient_checkpointing_enabled = False
 
-    def load_state_dict(self, state_dict, strict=True, assign=False):
-        # Router is randomly initialized (not in checkpoint), add its weights before loading.
-        for key, param in self.router.named_parameters():
-            sd_key = f"router.{key}"
-            if sd_key not in state_dict:
-                state_dict[sd_key] = param.data
-        return super().load_state_dict(state_dict, strict=strict, assign=assign)
-
         msg = "transformers_replace is not installed correctly. Please install it with `uv pip install transformers==4.53.2` and `cp -r ./src/openpi/models_pytorch/transformers_replace/* .venv/lib/python3.11/site-packages/transformers/`."
         try:
             from transformers.models.siglip import check
@@ -178,6 +170,14 @@ class PI0Pytorch(nn.Module):
                 raise ValueError(msg)
         except ImportError:
             raise ValueError(msg) from None
+
+    def load_state_dict(self, state_dict, strict=True, assign=False):
+        # Router is randomly initialized (not in checkpoint), add its weights before loading.
+        for key, param in self.router.named_parameters():
+            sd_key = f"router.{key}"
+            if sd_key not in state_dict:
+                state_dict[sd_key] = param.data
+        return super().load_state_dict(state_dict, strict=strict, assign=assign)
 
     def gradient_checkpointing_enable(self):
         """Enable gradient checkpointing for memory optimization."""
