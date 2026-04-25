@@ -1,5 +1,6 @@
 import logging
 import math
+import random
 
 import torch
 from torch import Tensor
@@ -145,30 +146,12 @@ class PI0Pytorch(nn.Module):
             self.action_time_mlp_in = nn.Linear(2 * action_expert_config.width, action_expert_config.width)
             self.action_time_mlp_out = nn.Linear(action_expert_config.width, action_expert_config.width)
 
-        # Router for dynamic NFE scheduling
-        self.router = nn.Sequential(
-            nn.Linear(paligemma_config.width, 256),
-            nn.SiLU(),
-            nn.Linear(256, 256),
-            nn.SiLU(),
-            nn.Linear(256, 1),
-            nn.Sigmoid(),
-        )
-
         torch.set_float32_matmul_precision("high")
         if config.pytorch_compile_mode is not None:
             self.sample_actions = torch.compile(self.sample_actions, mode=config.pytorch_compile_mode)
 
         # Initialize gradient checkpointing flag
         self.gradient_checkpointing_enabled = False
-
-    def load_state_dict(self, state_dict, strict=True, assign=False):
-        # Router is randomly initialized (not in checkpoint), add its weights before loading.
-        for key, param in self.router.named_parameters():
-            sd_key = f"router.{key}"
-            if sd_key not in state_dict:
-                state_dict[sd_key] = param.data
-        return super().load_state_dict(state_dict, strict=strict, assign=assign)
 
         msg = "transformers_replace is not installed correctly. Please install it with `uv pip install transformers==4.53.2` and `cp -r ./src/openpi/models_pytorch/transformers_replace/* .venv/lib/python3.11/site-packages/transformers/`."
         try:
@@ -458,25 +441,18 @@ class PI0Pytorch(nn.Module):
         prefix_att_2d_masks_4d = self._prepare_attention_masks_4d(prefix_att_2d_masks)
         self.paligemma_with_expert.paligemma.language_model.config._attn_implementation = "eager"  # noqa: SLF001
 
-        lm_output = self.paligemma_with_expert.paligemma.language_model.forward(
-            inputs_embeds=prefix_embs,
+        _, past_key_values = self.paligemma_with_expert.forward(
             attention_mask=prefix_att_2d_masks_4d,
             position_ids=prefix_position_ids,
             past_key_values=None,
+            inputs_embeds=[prefix_embs, None],
             use_cache=True,
-            adarms_cond=None,
-            output_hidden_states=True,
         )
-        past_key_values = lm_output.past_key_values
-        prefix_hidden = lm_output.hidden_states[-1]
 
-        # L1 Flow with dynamic NFE via Router
+        # L1 Flow 2-step inference (NFE=2)
         if self.l1_flow:
-            prefix_feat = prefix_hidden.mean(dim=1)
-            difficulty = self.router(prefix_feat).squeeze(-1)
-            if (difficulty > 0.3).any():
-                return self._l1_2step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
-            return self._l1_1step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
+            num_l1_steps = random.choice([1, 2])
+            return self._l1_flow_sample(state, prefix_pad_masks, past_key_values, noise, bsize, device, num_l1_steps=num_l1_steps)
 
         dt = -1.0 / num_steps
         dt = torch.tensor(dt, dtype=torch.float32, device=device)
@@ -498,18 +474,30 @@ class PI0Pytorch(nn.Module):
             time += dt
         return x_t
 
-    def _l1_2step(self, state, prefix_pad_masks, past_key_values, x0, bsize, device):
-        """Two-step L1 Flow inference (NFE=2): refine with Euler half-step."""
+    def _l1_flow_sample(self, state, prefix_pad_masks, past_key_values, x0, bsize, device, num_l1_steps=2):
+        """
+        L1 Flow inference:
+        num_l1_steps=1: directly predict x1 from pure noise (NFE=1)
+        num_l1_steps=2: two-step refinement (NFE=2)
+        """
+        # Step 1: Predict x1 at t=0 from pure noise
         t0 = torch.zeros(bsize, device=device, dtype=torch.float32)
-        x1_pred = self.denoise_step(state, prefix_pad_masks, past_key_values, x0, t0)
-        x_mid = x0 + 0.5 * (x1_pred - x0)
-        t_mid = torch.full((bsize,), 0.5, device=device, dtype=torch.float32)
-        return self.denoise_step(state, prefix_pad_masks, past_key_values, x_mid, t_mid)
+        x1_pred_coarse = self.denoise_step(
+            state, prefix_pad_masks, past_key_values, x0, t0
+        )
 
-    def _l1_1step(self, state, prefix_pad_masks, past_key_values, x0, bsize, device):
-        """Single-step L1 Flow inference (NFE=1): directly predict x1 from pure noise."""
-        t0 = torch.zeros(bsize, device=device, dtype=torch.float32)
-        return self.denoise_step(state, prefix_pad_masks, past_key_values, x0, t0)
+        if num_l1_steps == 1:
+            return x1_pred_coarse
+
+        # Step 2: From x_mid at t=0.5, directly predict x1
+        v_t0 = x1_pred_coarse - x0
+        x_mid = x0 + 0.5 * v_t0
+        t_mid = torch.full((bsize,), 0.5, device=device, dtype=torch.float32)
+        x1_final = self.denoise_step(
+            state, prefix_pad_masks, past_key_values, x_mid, t_mid
+        )
+
+        return x1_final
 
     def denoise_step(
         self,
