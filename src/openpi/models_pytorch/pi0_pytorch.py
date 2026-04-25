@@ -474,8 +474,10 @@ class PI0Pytorch(nn.Module):
         if self.l1_flow:
             prefix_feat = prefix_hidden.mean(dim=1)
             difficulty = self.router(prefix_feat).squeeze(-1)
-            if (difficulty > 0.3).any():
+            if (difficulty > 0.5).any():
+                print(2222222222222222222222222222222222)
                 return self._l1_2step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
+            print(11111111111111111111111111111111111)
             return self._l1_1step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
 
         dt = -1.0 / num_steps
