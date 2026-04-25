@@ -1,5 +1,6 @@
 import logging
 import math
+import random
 
 import torch
 from torch import Tensor
@@ -450,7 +451,8 @@ class PI0Pytorch(nn.Module):
 
         # L1 Flow 2-step inference (NFE=2)
         if self.l1_flow:
-            return self._l1_flow_sample(state, prefix_pad_masks, past_key_values, noise, bsize, device)
+            num_l1_steps = random.choice([1, 2])
+            return self._l1_flow_sample(state, prefix_pad_masks, past_key_values, noise, bsize, device, num_l1_steps=num_l1_steps)
 
         dt = -1.0 / num_steps
         dt = torch.tensor(dt, dtype=torch.float32, device=device)
@@ -472,12 +474,11 @@ class PI0Pytorch(nn.Module):
             time += dt
         return x_t
 
-    def _l1_flow_sample(self, state, prefix_pad_masks, past_key_values, x0, bsize, device):
+    def _l1_flow_sample(self, state, prefix_pad_masks, past_key_values, x0, bsize, device, num_l1_steps=2):
         """
-        L1 Flow 2-step inference:
-        Step 1: From x0 (t=1, pure noise), predict x1 at t=0, compute velocity,
-                take Euler step to t=0.5 → x_mid
-        Step 2: From x_mid at t=0.5, directly predict x1
+        L1 Flow inference:
+        num_l1_steps=1: directly predict x1 from pure noise (NFE=1)
+        num_l1_steps=2: two-step refinement (NFE=2)
         """
         # Step 1: Predict x1 at t=0 from pure noise
         t0 = torch.zeros(bsize, device=device, dtype=torch.float32)
@@ -485,13 +486,12 @@ class PI0Pytorch(nn.Module):
             state, prefix_pad_masks, past_key_values, x0, t0
         )
 
-        # Velocity at t=0: v = (x1_pred - x0) / (1 - 0) = x1_pred - x0
-        v_t0 = x1_pred_coarse - x0
-
-        # Euler step to t=0.5: x_0.5 = x0 + 0.5 * v
-        x_mid = x0 + 0.5 * v_t0
+        if num_l1_steps == 1:
+            return x1_pred_coarse
 
         # Step 2: From x_mid at t=0.5, directly predict x1
+        v_t0 = x1_pred_coarse - x0
+        x_mid = x0 + 0.5 * v_t0
         t_mid = torch.full((bsize,), 0.5, device=device, dtype=torch.float32)
         x1_final = self.denoise_step(
             state, prefix_pad_masks, past_key_values, x_mid, t_mid
