@@ -83,3 +83,43 @@ python examples/libero/main.py \
 | `--args.num-steps-wait` | `10` | 环境启动后等待步数 |
 | `--args.replan-steps` | `5` | 每次规划后执行的步数 |
 | `--args.seed` | `7` | 随机种子 |
+
+### LIBERO-Plus 评测
+
+LIBERO-Plus 是 LIBERO 的扩展基准，增加了 7 个扰动维度（Camera、Robot、Language、Light、Background、Noise、Layout）。
+
+通过 PYTHONPATH 在 LIBERO 和 LIBERO-Plus 之间切换：
+
+```bash
+# 切到 LIBERO-Plus
+export PYTHONPATH=$(pwd)/third_party/LIBERO-plus:$PYTHONPATH
+export LIBERO_CONFIG_PATH=/tmp/libero
+export PYOPENGL_PLATFORM=egl
+
+# 切回 LIBERO
+export PYTHONPATH=$(pwd)/third_party/libero:$PYTHONPATH
+unset LIBERO_CONFIG_PATH
+```
+
+启动策略服务后，运行评测：
+
+```bash
+# LIBERO-Plus 每个任务只有 1 个初始状态，num-trials-per-task 设为 1
+python examples/libero/main.py \
+    --args.task-suite-name libero_100 \
+    --args.num-trials-per-task 1 \
+    --args.host 0.0.0.0 \
+    --args.port 8002
+```
+
+可用 benchmark：
+
+| 参数值 | 说明 |
+|--------|------|
+| `libero_100` | 100 个独立任务 |
+| `libero_mix` | LIBERO-Plus 混合扰动任务 |
+| `libero_spatial` | 2402 个空间关系任务（含扰动） |
+| `libero_object` | 2518 个物体关系任务（含扰动） |
+| `libero_goal` | 2591 个目标任务（含扰动） |
+
+详细配置见 `notes/add_liberoplus.md`。
