@@ -472,8 +472,8 @@ class PI0Pytorch(nn.Module):
 
         # L1 Flow with dynamic NFE via Router
         if self.l1_flow:
-            #单纯的l1-flow
-            return self._l1_2step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
+            #单纯的l1-flow 1步
+            return self._l1_1step(state, prefix_pad_masks, past_key_values, noise, bsize, device)
             '''prefix_feat = prefix_hidden.mean(dim=1)
             difficulty = self.router(prefix_feat).squeeze(-1)
             if (difficulty > 0.5).any():
