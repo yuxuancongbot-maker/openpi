@@ -11,6 +11,7 @@ from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
 from openpi.training import config as _config
+from openpi.quant.vlaquant_demo import quant_pi05_policy, quant_pi05_policy_turbo
 
 
 class EnvMode(enum.Enum):
@@ -110,6 +111,8 @@ def create_policy(args: Args) -> _policy.Policy:
 
 def main(args: Args) -> None:
     policy = create_policy(args)
+    
+    policy = quant_pi05_policy(policy, weight_quant="per_channel", act_quant="per_token", n_bits=8, group_size=256) # W8A8 quant
     policy_metadata = policy.metadata
 
     # Record the policy's behavior.

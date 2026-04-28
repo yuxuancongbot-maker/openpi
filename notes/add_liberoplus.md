@@ -9,69 +9,51 @@ LIBERO-Plus 是 LIBERO 的扩展基准，在原有任务基础上增加了 7 个
 
 ## 安装
 
-### 1. 克隆
+### 1. 添加 submodule
 
 ```bash
 cd third_party
-git clone https://github.com/sylvestf/LIBERO-plus.git
+git submodule add https://github.com/sylvestf/LIBERO-plus.git
 ```
 
 ### 2. 下载 assets
 
-```bash
-source examples/libero/.venv/bin/activate
-mkdir -p third_party/libero_plus
-cd third_party/libero_plus
-
-python << 'EOF'
-from huggingface_hub import hf_hub_download
-hf_hub_download(
-    repo_id='Sylvest/LIBERO-plus',
-    filename='assets.zip',
-    local_dir='.',
-    repo_type='dataset'
-)
-EOF
-```
-
-### 3. 解压
+assets.zip 约 6GB，解压后约 15GB，用 wget 直接下载 HuggingFace：
 
 ```bash
-cd third_party/libero_plus
-mkdir -p ../LIBERO-plus/libero/libero
-unzip -o assets.zip "inspire/hdd/project/embodied-multimodality/public/syfei/libero_new/release/dataset/LIBERO-plus-0/assets/*" -d .
-mv inspire/hdd/project/embodied-multimodality/public/syfei/libero_new/release/dataset/LIBERO-plus-0/assets ../LIBERO-plus/libero/libero/
-rm -rf inspire assets.zip
+wget https://huggingface.co/datasets/Sylvest/LIBERO-plus/resolve/main/assets.zip \
+    -O /tmp/assets.zip
+
+cd third_party/LIBERO-plus/libero/libero
+
+# 解压（注意：zip 内部路径很深）
+unzip -o /tmp/assets.zip
+
+# 从深层路径把 assets 移到正确位置
+mv inspire/hdd/project/embodied-multimodality/public/syfei/libero_new/release/dataset/LIBERO-plus-0/assets .
+rm -rf inspire
+
+rm /tmp/assets.zip
 ```
 
-### 4. 安装 Python 包
+**最终 assets 位置**: `third_party/LIBERO-plus/libero/libero/assets/`
 
-```bash
-cd /inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/openpi
-source examples/libero/.venv/bin/activate
-
-# 卸载旧版 libero
-pip uninstall libero -y || true
-
-# 安装 LIBERO-Plus
-cd third_party/LIBERO-plus
-uv pip install -e .
-```
-
-### 5. 额外系统依赖
+### 3. 安装系统依赖
 
 ```bash
 apt install -y libexpat1 libfontconfig1-dev libpython3-stdlib libmagickwand-dev
 ```
+
+**注意**：不需要 `pip install` LIBERO-Plus。通过 PYTHONPATH 切换加载，避免与已安装的原版 LIBERO 冲突。
 
 ## 环境配置
 
 ### 创建 LIBERO 配置文件
 
 ```bash
-mkdir -p /tmp/libero
+mkdir -p ~/.libero
 
-cat > /tmp/libero/config.yaml << 'EOF'
+cat > ~/.libero/config.yaml << 'EOF'
 benchmark_root: /inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/openpi/third_party/LIBERO-plus/libero/libero
 bddl_files: /inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/openpi/third_party/LIBERO-plus/libero/libero/bddl_files
 init_states: /inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/openpi/third_party/LIBERO-plus/libero/libero/init_files
@@ -88,7 +70,7 @@ LIBERO 和 LIBERO-Plus 的 Python 包名都是 `libero`，不能同时存在。�
 
 ```bash
 export PYTHONPATH=$(pwd)/third_party/LIBERO-plus:$PYTHONPATH
-export LIBERO_CONFIG_PATH=/tmp/libero
+export LIBERO_CONFIG_PATH=~/.libero
 export PYOPENGL_PLATFORM=egl
 ```
 
@@ -108,7 +90,7 @@ use_libero() {
 }
 use_libero_plus() {
     export PYTHONPATH=$(pwd)/third_party/LIBERO-plus:$PYTHONPATH
-    export LIBERO_CONFIG_PATH=/tmp/libero
+    export LIBERO_CONFIG_PATH=~/.libero
     export PYOPENGL_PLATFORM=egl
 }
 ```
@@ -143,7 +125,7 @@ uv run scripts/serve_policy.py --port 8002 \
 ```bash
 # 设置环境
 export PYTHONPATH=$(pwd)/third_party/LIBERO-plus:$PYTHONPATH
-export LIBERO_CONFIG_PATH=/tmp/libero
+export LIBERO_CONFIG_PATH=~/.libero
 export PYOPENGL_PLATFORM=egl
 
 # 注意：LIBERO-Plus 每个任务只有 1 个初始状态，num-trials-per-task 设为 1
