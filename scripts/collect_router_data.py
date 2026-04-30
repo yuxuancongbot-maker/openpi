@@ -33,6 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description="Collect prefix features and diffs for Router training")
     parser.add_argument("--config", default="pi05_libero_l1_flow", help="Training config name")
     parser.add_argument("--checkpoint_dir", required=True, help="Path to checkpoint dir (containing model.safetensors + assets)")
+    parser.add_argument("--data_dir", default=None, help="Local LeRobot dataset path (overrides config repo_id, e.g. for LIBERO-Plus)")
     parser.add_argument("--num_samples", type=int, default=2000, help="Number of samples to collect")
     parser.add_argument("--output", default="router_data.npz", help="Output .npz file path")
     args = parser.parse_args()
@@ -45,7 +46,7 @@ def main():
     data_config = train_config.data.create(train_config.assets_dirs, train_config.model)
     logger.info("Config: %s", args.config)
 
-    # 2. Load norm stats from checkpoint
+    # 2. Load norm stats from checkpoint (must use original asset_id before repo_id override)
     ckpt_dir = pathlib.Path(args.checkpoint_dir)
     norm_stats = _checkpoints.load_norm_stats(ckpt_dir / "assets", data_config.asset_id)
     data_config = dataclasses.replace(data_config, norm_stats=norm_stats)
@@ -59,8 +60,26 @@ def main():
     model = model.to(device)
     logger.info("Model loaded and moved to %s", device)
 
+    # Override repo_id with local dataset path if provided (after norm_stats loaded)
+    if args.data_dir:
+        data_config = dataclasses.replace(data_config, repo_id=args.data_dir)
+        logger.info("Using local dataset: %s", args.data_dir)
+
     # 4. Create dataset with transforms
-    raw_dataset = create_torch_dataset(data_config, train_config.model.action_horizon, train_config.model)
+    from lerobot.common.datasets import lerobot_dataset
+    dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(data_config.repo_id)
+    raw_dataset = lerobot_dataset.LeRobotDataset(
+        data_config.repo_id,
+        delta_timestamps={
+            key: [t / dataset_meta.fps for t in range(train_config.model.action_horizon)]
+            for key in data_config.action_sequence_keys
+        },
+        video_backend="pyav",
+    )
+    if data_config.prompt_from_task:
+        from openpi.training.data_loader import TransformedDataset
+        from openpi import transforms as _transforms
+        raw_dataset = TransformedDataset(raw_dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
     dataset = transform_dataset(raw_dataset, data_config)
     logger.info("Dataset created: %d samples", len(dataset))
 

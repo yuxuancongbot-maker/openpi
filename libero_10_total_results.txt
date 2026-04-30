@@ -63,3 +63,133 @@ Repeat 4 task: put the yellow and white mug in the microwave and close it | succ
 Repeat 4 total success rate: 0.906
 Repeat 4 total episodes: 500
 --------------------------------------------------
+Repeat 0 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.94
+Repeat 0 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 0 task: turn on the stove and put the moka pot on it | success rate: 0.98
+Repeat 0 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.96
+Repeat 0 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.96
+Repeat 0 task: pick up the book and place it in the back compartment of the caddy | success rate: 0.98
+Repeat 0 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.96
+Repeat 0 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.98
+Repeat 0 task: put both moka pots on the stove | success rate: 0.56
+Repeat 0 task: put the yellow and white mug in the microwave and close it | success rate: 0.98
+Repeat 0 total success rate: 0.93
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.92
+Repeat 1 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 1 task: turn on the stove and put the moka pot on it | success rate: 0.9
+Repeat 1 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.96
+Repeat 1 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.92
+Repeat 1 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 1 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.92
+Repeat 1 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.98
+Repeat 1 task: put both moka pots on the stove | success rate: 0.58
+Repeat 1 task: put the yellow and white mug in the microwave and close it | success rate: 0.98
+Repeat 1 total success rate: 0.916
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.94
+Repeat 2 task: put both the cream cheese box and the butter in the basket | success rate: 0.96
+Repeat 2 task: turn on the stove and put the moka pot on it | success rate: 0.92
+Repeat 2 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.94
+Repeat 2 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.9
+Repeat 2 task: pick up the book and place it in the back compartment of the caddy | success rate: 0.96
+Repeat 2 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.98
+Repeat 2 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 1.0
+Repeat 2 task: put both moka pots on the stove | success rate: 0.56
+Repeat 2 task: put the yellow and white mug in the microwave and close it | success rate: 1.0
+Repeat 2 total success rate: 0.916
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.88
+Repeat 3 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 3 task: turn on the stove and put the moka pot on it | success rate: 0.98
+Repeat 3 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.98
+Repeat 3 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.96
+Repeat 3 task: pick up the book and place it in the back compartment of the caddy | success rate: 0.98
+Repeat 3 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.9
+Repeat 3 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.94
+Repeat 3 task: put both moka pots on the stove | success rate: 0.56
+Repeat 3 task: put the yellow and white mug in the microwave and close it | success rate: 0.96
+Repeat 3 total success rate: 0.914
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.9
+Repeat 4 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 4 task: turn on the stove and put the moka pot on it | success rate: 1.0
+Repeat 4 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.96
+Repeat 4 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.92
+Repeat 4 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 4 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 1.0
+Repeat 4 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.94
+Repeat 4 task: put both moka pots on the stove | success rate: 0.58
+Repeat 4 task: put the yellow and white mug in the microwave and close it | success rate: 0.98
+Repeat 4 total success rate: 0.928
+Repeat 4 total episodes: 500
+--------------------------------------------------
+Repeat 0 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.94
+Repeat 0 task: put both the cream cheese box and the butter in the basket | success rate: 0.98
+Repeat 0 task: turn on the stove and put the moka pot on it | success rate: 0.96
+Repeat 0 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 1.0
+Repeat 0 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.98
+Repeat 0 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 0 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.94
+Repeat 0 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.98
+Repeat 0 task: put both moka pots on the stove | success rate: 0.64
+Repeat 0 task: put the yellow and white mug in the microwave and close it | success rate: 0.96
+Repeat 0 total success rate: 0.938
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.96
+Repeat 1 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 1 task: turn on the stove and put the moka pot on it | success rate: 1.0
+Repeat 1 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.98
+Repeat 1 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.98
+Repeat 1 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 1 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.94
+Repeat 1 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.98
+Repeat 1 task: put both moka pots on the stove | success rate: 0.62
+Repeat 1 task: put the yellow and white mug in the microwave and close it | success rate: 0.9
+Repeat 1 total success rate: 0.936
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.94
+Repeat 2 task: put both the cream cheese box and the butter in the basket | success rate: 1.0
+Repeat 2 task: turn on the stove and put the moka pot on it | success rate: 0.98
+Repeat 2 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.96
+Repeat 2 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.98
+Repeat 2 task: pick up the book and place it in the back compartment of the caddy | success rate: 0.98
+Repeat 2 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.96
+Repeat 2 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 1.0
+Repeat 2 task: put both moka pots on the stove | success rate: 0.6
+Repeat 2 task: put the yellow and white mug in the microwave and close it | success rate: 0.94
+Repeat 2 total success rate: 0.934
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.98
+Repeat 3 task: put both the cream cheese box and the butter in the basket | success rate: 0.96
+Repeat 3 task: turn on the stove and put the moka pot on it | success rate: 0.96
+Repeat 3 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.96
+Repeat 3 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.98
+Repeat 3 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 3 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.96
+Repeat 3 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.96
+Repeat 3 task: put both moka pots on the stove | success rate: 0.64
+Repeat 3 task: put the yellow and white mug in the microwave and close it | success rate: 0.96
+Repeat 3 total success rate: 0.936
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: put both the alphabet soup and the tomato sauce in the basket | success rate: 0.96
+Repeat 4 task: put both the cream cheese box and the butter in the basket | success rate: 0.98
+Repeat 4 task: turn on the stove and put the moka pot on it | success rate: 1.0
+Repeat 4 task: put the black bowl in the bottom drawer of the cabinet and close it | success rate: 0.98
+Repeat 4 task: put the white mug on the left plate and put the yellow and white mug on the right plate | success rate: 0.98
+Repeat 4 task: pick up the book and place it in the back compartment of the caddy | success rate: 1.0
+Repeat 4 task: put the white mug on the plate and put the chocolate pudding to the right of the plate | success rate: 0.94
+Repeat 4 task: put both the alphabet soup and the cream cheese box in the basket | success rate: 0.98
+Repeat 4 task: put both moka pots on the stove | success rate: 0.66
+Repeat 4 task: put the yellow and white mug in the microwave and close it | success rate: 0.92
+Repeat 4 total success rate: 0.94
+Repeat 4 total episodes: 500
+--------------------------------------------------

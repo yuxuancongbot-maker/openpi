@@ -357,6 +357,59 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
 
 
 @dataclasses.dataclass(frozen=True)
+class LeRobotLiberoPlusDataConfig(DataConfigFactory):
+    """
+    Data config for libero_plus_lerobot dataset (LeRobot v2.1 standard format).
+
+    Key differences from LeRobotLiberoDataConfig (physical-intelligence/libero):
+      - action source key:      'action'  (singular)  vs 'actions' (plural)
+      - front image source key: 'observation.images.front' vs 'image'
+      - wrist image source key: 'observation.images.wrist' vs 'wrist_image'
+      - state source key:       'observation.state'   vs 'state'
+    """
+
+    extra_delta_transform: bool = False
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/image": "observation.images.front",
+                        "observation/wrist_image": "observation.images.wrist",
+                        "observation/state": "observation.state",
+                        "actions": "action",
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[libero_policy.LiberoInputs(model_type=model_config.model_type)],
+            outputs=[libero_policy.LiberoOutputs()],
+        )
+
+        if self.extra_delta_transform:
+            delta_action_mask = _transforms.make_bool_mask(6, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=("action",),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
 class RLDSDroidDataConfig(DataConfigFactory):
     """
     Config for training on DROID, using RLDS data format (for efficient training on larger datasets).
@@ -998,6 +1051,35 @@ _CONFIGS = [
         num_train_steps=30_000,
         # Freeze everything except action expert (llm_1).
         # ".*llm.*_1.*" matches action expert params; Not(...) matches everything else → frozen.
+        freeze_filter=nnx.Not(nnx_utils.PathRegex(".*llm.*_1.*")),
+    ),
+    #
+    # π0.5 + L1 Flow on LIBERO-Plus (perturbation-augmented data)
+    #
+    TrainConfig(
+        name="pi05_libero_plus_l1_flow",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_horizon=10,
+            discrete_state_input=False,
+            l1_flow=True,
+        ),
+        data=LeRobotLiberoPlusDataConfig(
+            repo_id="data/libero_plus_lerobot",
+            base_config=DataConfig(prompt_from_task=True),
+            extra_delta_transform=False,
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=5e-5,
+            decay_steps=1_000_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        num_train_steps=30_000,
         freeze_filter=nnx.Not(nnx_utils.PathRegex(".*llm.*_1.*")),
     ),
     # RoboArena & PolaRiS configs.

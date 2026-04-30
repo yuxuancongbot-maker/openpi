@@ -64,3 +64,132 @@ Repeat 4 total success rate: 0.944
 Repeat 4 total episodes: 500
 --------------------------------------------------
 Repeat 0 task: pick up the alphabet soup and place it in the basket | success rate: 0.94
+Repeat 0 task: pick up the cream cheese and place it in the basket | success rate: 0.96
+Repeat 0 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the ketchup and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the tomato sauce and place it in the basket | success rate: 0.98
+Repeat 0 task: pick up the butter and place it in the basket | success rate: 0.98
+Repeat 0 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the chocolate pudding and place it in the basket | success rate: 0.94
+Repeat 0 task: pick up the orange juice and place it in the basket | success rate: 1.0
+Repeat 0 total success rate: 0.98
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 1 task: pick up the cream cheese and place it in the basket | success rate: 0.94
+Repeat 1 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the bbq sauce and place it in the basket | success rate: 0.98
+Repeat 1 task: pick up the ketchup and place it in the basket | success rate: 0.94
+Repeat 1 task: pick up the tomato sauce and place it in the basket | success rate: 0.94
+Repeat 1 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the chocolate pudding and place it in the basket | success rate: 0.88
+Repeat 1 task: pick up the orange juice and place it in the basket | success rate: 0.96
+Repeat 1 total success rate: 0.96
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: pick up the alphabet soup and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the cream cheese and place it in the basket | success rate: 0.94
+Repeat 2 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the ketchup and place it in the basket | success rate: 0.98
+Repeat 2 task: pick up the tomato sauce and place it in the basket | success rate: 0.92
+Repeat 2 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the chocolate pudding and place it in the basket | success rate: 0.86
+Repeat 2 task: pick up the orange juice and place it in the basket | success rate: 1.0
+Repeat 2 total success rate: 0.97
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 3 task: pick up the cream cheese and place it in the basket | success rate: 0.94
+Repeat 3 task: pick up the salad dressing and place it in the basket | success rate: 0.98
+Repeat 3 task: pick up the bbq sauce and place it in the basket | success rate: 0.96
+Repeat 3 task: pick up the ketchup and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the tomato sauce and place it in the basket | success rate: 0.92
+Repeat 3 task: pick up the butter and place it in the basket | success rate: 0.98
+Repeat 3 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the chocolate pudding and place it in the basket | success rate: 0.96
+Repeat 3 task: pick up the orange juice and place it in the basket | success rate: 1.0
+Repeat 3 total success rate: 0.97
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 4 task: pick up the cream cheese and place it in the basket | success rate: 0.88
+Repeat 4 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the ketchup and place it in the basket | success rate: 0.96
+Repeat 4 task: pick up the tomato sauce and place it in the basket | success rate: 0.96
+Repeat 4 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the chocolate pudding and place it in the basket | success rate: 0.92
+Repeat 4 task: pick up the orange juice and place it in the basket | success rate: 1.0
+Repeat 4 total success rate: 0.968
+Repeat 4 total episodes: 500
+--------------------------------------------------
+Repeat 0 task: pick up the alphabet soup and place it in the basket | success rate: 0.94
+Repeat 0 task: pick up the cream cheese and place it in the basket | success rate: 0.98
+Repeat 0 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the ketchup and place it in the basket | success rate: 0.96
+Repeat 0 task: pick up the tomato sauce and place it in the basket | success rate: 0.9
+Repeat 0 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 0 task: pick up the chocolate pudding and place it in the basket | success rate: 0.9
+Repeat 0 task: pick up the orange juice and place it in the basket | success rate: 0.98
+Repeat 0 total success rate: 0.966
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 1 task: pick up the cream cheese and place it in the basket | success rate: 0.96
+Repeat 1 task: pick up the salad dressing and place it in the basket | success rate: 0.98
+Repeat 1 task: pick up the bbq sauce and place it in the basket | success rate: 0.98
+Repeat 1 task: pick up the ketchup and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the tomato sauce and place it in the basket | success rate: 0.98
+Repeat 1 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 1 task: pick up the chocolate pudding and place it in the basket | success rate: 0.88
+Repeat 1 task: pick up the orange juice and place it in the basket | success rate: 0.98
+Repeat 1 total success rate: 0.972
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: pick up the alphabet soup and place it in the basket | success rate: 0.98
+Repeat 2 task: pick up the cream cheese and place it in the basket | success rate: 0.98
+Repeat 2 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the bbq sauce and place it in the basket | success rate: 0.98
+Repeat 2 task: pick up the ketchup and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the tomato sauce and place it in the basket | success rate: 0.94
+Repeat 2 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 2 task: pick up the chocolate pudding and place it in the basket | success rate: 0.88
+Repeat 2 task: pick up the orange juice and place it in the basket | success rate: 0.98
+Repeat 2 total success rate: 0.974
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 3 task: pick up the cream cheese and place it in the basket | success rate: 0.98
+Repeat 3 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the ketchup and place it in the basket | success rate: 0.98
+Repeat 3 task: pick up the tomato sauce and place it in the basket | success rate: 0.94
+Repeat 3 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 3 task: pick up the chocolate pudding and place it in the basket | success rate: 0.88
+Repeat 3 task: pick up the orange juice and place it in the basket | success rate: 0.98
+Repeat 3 total success rate: 0.972
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: pick up the alphabet soup and place it in the basket | success rate: 0.96
+Repeat 4 task: pick up the cream cheese and place it in the basket | success rate: 0.98
+Repeat 4 task: pick up the salad dressing and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the bbq sauce and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the ketchup and place it in the basket | success rate: 0.98
+Repeat 4 task: pick up the tomato sauce and place it in the basket | success rate: 0.98
+Repeat 4 task: pick up the butter and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the milk and place it in the basket | success rate: 1.0
+Repeat 4 task: pick up the chocolate pudding and place it in the basket | success rate: 0.88
+Repeat 4 task: pick up the orange juice and place it in the basket | success rate: 0.98
+Repeat 4 total success rate: 0.976
+Repeat 4 total episodes: 500
+--------------------------------------------------

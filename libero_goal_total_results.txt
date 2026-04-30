@@ -64,3 +64,132 @@ Repeat 4 total success rate: 0.976
 Repeat 4 total episodes: 500
 --------------------------------------------------
 Repeat 0 task: open the middle drawer of the cabinet | success rate: 0.96
+Repeat 0 task: put the bowl on the stove | success rate: 1.0
+Repeat 0 task: put the wine bottle on top of the cabinet | success rate: 1.0
+Repeat 0 task: open the top drawer and put the bowl inside | success rate: 0.94
+Repeat 0 task: put the bowl on top of the cabinet | success rate: 0.96
+Repeat 0 task: push the plate to the front of the stove | success rate: 0.96
+Repeat 0 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 0 task: turn on the stove | success rate: 1.0
+Repeat 0 task: put the bowl on the plate | success rate: 1.0
+Repeat 0 task: put the wine bottle on the rack | success rate: 0.98
+Repeat 0 total success rate: 0.98
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: open the middle drawer of the cabinet | success rate: 0.94
+Repeat 1 task: put the bowl on the stove | success rate: 1.0
+Repeat 1 task: put the wine bottle on top of the cabinet | success rate: 0.96
+Repeat 1 task: open the top drawer and put the bowl inside | success rate: 0.94
+Repeat 1 task: put the bowl on top of the cabinet | success rate: 0.94
+Repeat 1 task: push the plate to the front of the stove | success rate: 0.96
+Repeat 1 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 1 task: turn on the stove | success rate: 1.0
+Repeat 1 task: put the bowl on the plate | success rate: 1.0
+Repeat 1 task: put the wine bottle on the rack | success rate: 0.98
+Repeat 1 total success rate: 0.972
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: open the middle drawer of the cabinet | success rate: 0.94
+Repeat 2 task: put the bowl on the stove | success rate: 1.0
+Repeat 2 task: put the wine bottle on top of the cabinet | success rate: 0.98
+Repeat 2 task: open the top drawer and put the bowl inside | success rate: 0.86
+Repeat 2 task: put the bowl on top of the cabinet | success rate: 0.96
+Repeat 2 task: push the plate to the front of the stove | success rate: 1.0
+Repeat 2 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 2 task: turn on the stove | success rate: 1.0
+Repeat 2 task: put the bowl on the plate | success rate: 0.98
+Repeat 2 task: put the wine bottle on the rack | success rate: 0.96
+Repeat 2 total success rate: 0.968
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: open the middle drawer of the cabinet | success rate: 0.94
+Repeat 3 task: put the bowl on the stove | success rate: 0.98
+Repeat 3 task: put the wine bottle on top of the cabinet | success rate: 0.98
+Repeat 3 task: open the top drawer and put the bowl inside | success rate: 0.94
+Repeat 3 task: put the bowl on top of the cabinet | success rate: 0.96
+Repeat 3 task: push the plate to the front of the stove | success rate: 0.96
+Repeat 3 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 3 task: turn on the stove | success rate: 1.0
+Repeat 3 task: put the bowl on the plate | success rate: 0.98
+Repeat 3 task: put the wine bottle on the rack | success rate: 1.0
+Repeat 3 total success rate: 0.974
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: open the middle drawer of the cabinet | success rate: 0.98
+Repeat 4 task: put the bowl on the stove | success rate: 1.0
+Repeat 4 task: put the wine bottle on top of the cabinet | success rate: 0.98
+Repeat 4 task: open the top drawer and put the bowl inside | success rate: 0.92
+Repeat 4 task: put the bowl on top of the cabinet | success rate: 0.92
+Repeat 4 task: push the plate to the front of the stove | success rate: 0.98
+Repeat 4 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 4 task: turn on the stove | success rate: 1.0
+Repeat 4 task: put the bowl on the plate | success rate: 1.0
+Repeat 4 task: put the wine bottle on the rack | success rate: 0.96
+Repeat 4 total success rate: 0.974
+Repeat 4 total episodes: 500
+--------------------------------------------------
+Repeat 0 task: open the middle drawer of the cabinet | success rate: 0.94
+Repeat 0 task: put the bowl on the stove | success rate: 1.0
+Repeat 0 task: put the wine bottle on top of the cabinet | success rate: 0.96
+Repeat 0 task: open the top drawer and put the bowl inside | success rate: 0.92
+Repeat 0 task: put the bowl on top of the cabinet | success rate: 1.0
+Repeat 0 task: push the plate to the front of the stove | success rate: 1.0
+Repeat 0 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 0 task: turn on the stove | success rate: 1.0
+Repeat 0 task: put the bowl on the plate | success rate: 0.98
+Repeat 0 task: put the wine bottle on the rack | success rate: 1.0
+Repeat 0 total success rate: 0.98
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: open the middle drawer of the cabinet | success rate: 0.94
+Repeat 1 task: put the bowl on the stove | success rate: 1.0
+Repeat 1 task: put the wine bottle on top of the cabinet | success rate: 0.96
+Repeat 1 task: open the top drawer and put the bowl inside | success rate: 0.94
+Repeat 1 task: put the bowl on top of the cabinet | success rate: 1.0
+Repeat 1 task: push the plate to the front of the stove | success rate: 0.96
+Repeat 1 task: put the cream cheese in the bowl | success rate: 0.98
+Repeat 1 task: turn on the stove | success rate: 1.0
+Repeat 1 task: put the bowl on the plate | success rate: 1.0
+Repeat 1 task: put the wine bottle on the rack | success rate: 1.0
+Repeat 1 total success rate: 0.978
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: open the middle drawer of the cabinet | success rate: 0.96
+Repeat 2 task: put the bowl on the stove | success rate: 1.0
+Repeat 2 task: put the wine bottle on top of the cabinet | success rate: 0.98
+Repeat 2 task: open the top drawer and put the bowl inside | success rate: 0.94
+Repeat 2 task: put the bowl on top of the cabinet | success rate: 0.98
+Repeat 2 task: push the plate to the front of the stove | success rate: 1.0
+Repeat 2 task: put the cream cheese in the bowl | success rate: 0.98
+Repeat 2 task: turn on the stove | success rate: 1.0
+Repeat 2 task: put the bowl on the plate | success rate: 1.0
+Repeat 2 task: put the wine bottle on the rack | success rate: 0.96
+Repeat 2 total success rate: 0.98
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: open the middle drawer of the cabinet | success rate: 0.98
+Repeat 3 task: put the bowl on the stove | success rate: 1.0
+Repeat 3 task: put the wine bottle on top of the cabinet | success rate: 0.96
+Repeat 3 task: open the top drawer and put the bowl inside | success rate: 0.92
+Repeat 3 task: put the bowl on top of the cabinet | success rate: 0.98
+Repeat 3 task: push the plate to the front of the stove | success rate: 0.92
+Repeat 3 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 3 task: turn on the stove | success rate: 1.0
+Repeat 3 task: put the bowl on the plate | success rate: 1.0
+Repeat 3 task: put the wine bottle on the rack | success rate: 0.98
+Repeat 3 total success rate: 0.974
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: open the middle drawer of the cabinet | success rate: 0.98
+Repeat 4 task: put the bowl on the stove | success rate: 0.98
+Repeat 4 task: put the wine bottle on top of the cabinet | success rate: 0.96
+Repeat 4 task: open the top drawer and put the bowl inside | success rate: 0.92
+Repeat 4 task: put the bowl on top of the cabinet | success rate: 0.94
+Repeat 4 task: push the plate to the front of the stove | success rate: 0.98
+Repeat 4 task: put the cream cheese in the bowl | success rate: 1.0
+Repeat 4 task: turn on the stove | success rate: 1.0
+Repeat 4 task: put the bowl on the plate | success rate: 0.98
+Repeat 4 task: put the wine bottle on the rack | success rate: 0.96
+Repeat 4 total success rate: 0.97
+Repeat 4 total episodes: 500
+--------------------------------------------------

@@ -167,4 +167,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 router_data.npz
+router_data_liberoplus.npz
 third_party/LIBERO-plus/

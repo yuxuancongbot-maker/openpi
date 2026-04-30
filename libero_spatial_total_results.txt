@@ -64,3 +64,132 @@ Repeat 4 total success rate: 0.99
 Repeat 4 total episodes: 500
 --------------------------------------------------
 Repeat 0 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 0 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 0.98
+Repeat 0 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.96
+Repeat 0 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 0 total success rate: 0.99
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 1 total success rate: 0.992
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl from table center and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 2 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.92
+Repeat 2 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 2 total success rate: 0.978
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 0.98
+Repeat 3 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 3 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 3 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 3 total success rate: 0.992
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 4 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.96
+Repeat 4 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 4 total success rate: 0.992
+Repeat 4 total episodes: 500
+--------------------------------------------------
+Repeat 0 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 0 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 0.98
+Repeat 0 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 0 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 0 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 0 total success rate: 0.992
+Repeat 0 total episodes: 500
+--------------------------------------------------
+Repeat 1 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 0.88
+Repeat 1 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 1 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 1 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 1 total success rate: 0.984
+Repeat 1 total episodes: 500
+--------------------------------------------------
+Repeat 2 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 2 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 2 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 2 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 0.98
+Repeat 2 total success rate: 0.986
+Repeat 2 total episodes: 500
+--------------------------------------------------
+Repeat 3 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 3 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 0.96
+Repeat 3 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 3 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 3 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 3 total success rate: 0.99
+Repeat 3 total episodes: 500
+--------------------------------------------------
+Repeat 4 task: pick up the black bowl between the plate and the ramekin and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl next to the ramekin and place it on the plate | success rate: 0.98
+Repeat 4 task: pick up the black bowl from table center and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl on the cookie box and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate | success rate: 0.96
+Repeat 4 task: pick up the black bowl on the ramekin and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl next to the cookie box and place it on the plate | success rate: 0.96
+Repeat 4 task: pick up the black bowl on the stove and place it on the plate | success rate: 0.98
+Repeat 4 task: pick up the black bowl next to the plate and place it on the plate | success rate: 1.0
+Repeat 4 task: pick up the black bowl on the wooden cabinet and place it on the plate | success rate: 1.0
+Repeat 4 total success rate: 0.988
+Repeat 4 total episodes: 500
+--------------------------------------------------
