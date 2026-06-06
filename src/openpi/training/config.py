@@ -369,8 +369,8 @@ class LeRobotFrankaDataConfig(DataConfigFactory):
     """
 
     # If true, will convert absolute joint actions to deltas.
-    # Set to False if your dataset actions are already delta actions (mean ≈ 0).
-    use_delta_joint_actions: bool = False
+    # franka_test stores action as the next absolute qpos, so keep this True.
+    use_delta_joint_actions: bool = True
 
     # If true, will apply an extra delta transform on top of the data.
     extra_delta_transform: bool = False
@@ -851,6 +851,7 @@ _CONFIGS = [
             base_config=DataConfig(
                 prompt_from_task=True,
             ),
+            use_delta_joint_actions=True,
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=300,
@@ -876,6 +877,7 @@ _CONFIGS = [
             base_config=DataConfig(
                 prompt_from_task=True,
             ),
+            use_delta_joint_actions=True,
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=300,
@@ -897,6 +899,7 @@ _CONFIGS = [
             base_config=DataConfig(
                 prompt_from_task=True,
             ),
+            use_delta_joint_actions=True,
         ),
         batch_size=256,
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -929,6 +932,7 @@ _CONFIGS = [
             base_config=DataConfig(
                 prompt_from_task=True,
             ),
+            use_delta_joint_actions=True,
         ),
         batch_size=32,
         lr_schedule=_optimizer.CosineDecaySchedule(
