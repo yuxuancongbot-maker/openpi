@@ -19,6 +19,7 @@ import openpi.models.pi0_fast as pi0_fast
 import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
+import openpi.policies.franka_policy as franka_policy
 import openpi.policies.libero_policy as libero_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
@@ -352,6 +353,83 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
             repack_transforms=repack_transform,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotFrankaDataConfig(DataConfigFactory):
+    """
+    Config for training on Franka FR3 robot data in LeRobot format.
+
+    The Franka FR3 has 9 action dimensions: 7 joint angles + 2 finger joints.
+
+    Set use_delta_joint_actions=True if your dataset stores ABSOLUTE joint positions
+    (actions need to be converted to deltas relative to current state).
+    Set use_delta_joint_actions=False if your dataset already stores delta actions.
+    """
+
+    # If true, will convert absolute joint actions to deltas.
+    # Set to False if your dataset actions are already delta actions (mean ≈ 0).
+    use_delta_joint_actions: bool = False
+
+    # If true, will apply an extra delta transform on top of the data.
+    extra_delta_transform: bool = False
+
+    # franka_test 数据集的 action 特征名为 "action"（单数形式）
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/image": "observation.images.cam_high",
+                        "observation/wrist_image": "observation.images.cam_wrist",
+                        "observation/state": "observation.state",
+                        "actions": "action",
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[franka_policy.FrankaInputs(model_type=model_config.model_type)],
+            outputs=[franka_policy.FrankaOutputs()],
+        )
+
+        # Delta/absolute action handling.
+        # - use_delta_joint_actions=True:  dataset has absolute actions → train on deltas
+        # - use_delta_joint_actions=False: dataset already has delta actions
+        # In both cases, inference outputs need AbsoluteActions to convert model
+        # delta predictions back to absolute actions for the robot.
+        delta_action_mask = _transforms.make_bool_mask(7, -2)
+        if self.use_delta_joint_actions:
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+        else:
+            # Dataset already delta, but inference still needs delta→absolute.
+            data_transforms = data_transforms.push(
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        if self.extra_delta_transform:
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
         )
 
 
@@ -760,6 +838,117 @@ _CONFIGS = [
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         pytorch_weight_path="/path/to/your/pytorch_weight_path",
         num_train_steps=30_000,
+    ),
+    #
+    # Fine-tuning Franka configs.
+    #
+    TrainConfig(
+        name="pi0_franka_test",
+        model=pi0_config.Pi0Config(),
+        data=LeRobotFrankaDataConfig(
+            repo_id="iloveai111/franka_test",
+            assets=AssetsConfig(asset_id="franka_test"),
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=300,
+            peak_lr=2.5e-5,
+            decay_steps=3_000,
+            decay_lr=2.5e-5,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        # 小数据集：~10k 帧, batch_size=32 → ~330 步/epoch
+        # 3000 步 ≈ 9 epochs, 从 pi0_base 开始需要多训几轮
+        num_train_steps=3_000,
+    ),
+    TrainConfig(
+        name="pi0_fast_franka_test",
+        model=pi0_fast.Pi0FASTConfig(
+            action_dim=9,
+            action_horizon=10,
+            max_token_len=180,
+        ),
+        data=LeRobotFrankaDataConfig(
+            repo_id="iloveai111/franka_test",
+            assets=AssetsConfig(asset_id="franka_test"),
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=300,
+            peak_lr=2.5e-5,
+            decay_steps=3_000,
+            decay_lr=2.5e-5,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
+        # 小数据集：~10k 帧, batch_size=32 → ~330 步/epoch
+        # 3000 步 ≈ 9 epochs
+        num_train_steps=3_000,
+    ),
+    TrainConfig(
+        name="pi05_franka_test",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=10, discrete_state_input=False),
+        data=LeRobotFrankaDataConfig(
+            repo_id="iloveai111/franka_test",
+            assets=AssetsConfig(asset_id="franka_test"),
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=5e-5,
+            decay_steps=1_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        # Full fine-tuning requires >50GB GPU memory during train-state initialization.
+        # Use pi05_franka_test_low_mem on 24GB/40GB GPUs.
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        # 小数据集：10 episodes, ~10k 帧, batch_size=256 → ~41 步/epoch
+        # 1000 步 ≈ 24 epochs, 对于已微调的 libero 模型足够
+        num_train_steps=1_000,
+    ),
+    TrainConfig(
+        name="pi05_franka_test_low_mem",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_horizon=10,
+            discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFrankaDataConfig(
+            repo_id="iloveai111/franka_test",
+            assets=AssetsConfig(asset_id="franka_test"),
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+        ),
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=5e-5,
+            decay_steps=1_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        # Turn off EMA for LoRA fine-tuning to save memory.
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            action_horizon=10,
+            discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        num_train_steps=1_000,
     ),
     #
     # Fine-tuning Aloha configs.
