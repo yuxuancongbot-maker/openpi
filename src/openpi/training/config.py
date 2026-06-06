@@ -846,7 +846,7 @@ _CONFIGS = [
         name="pi0_franka_test",
         model=pi0_config.Pi0Config(),
         data=LeRobotFrankaDataConfig(
-            repo_id="iloveai111/franka_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/data/franka_test",
             assets=AssetsConfig(asset_id="franka_test"),
             base_config=DataConfig(
                 prompt_from_task=True,
@@ -872,7 +872,7 @@ _CONFIGS = [
             max_token_len=180,
         ),
         data=LeRobotFrankaDataConfig(
-            repo_id="iloveai111/franka_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/data/franka_test",
             assets=AssetsConfig(asset_id="franka_test"),
             base_config=DataConfig(
                 prompt_from_task=True,
@@ -894,7 +894,7 @@ _CONFIGS = [
         name="pi05_franka_test",
         model=pi0_config.Pi0Config(pi05=True, action_horizon=10, discrete_state_input=False),
         data=LeRobotFrankaDataConfig(
-            repo_id="iloveai111/franka_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/data/franka_test",
             assets=AssetsConfig(asset_id="franka_test"),
             base_config=DataConfig(
                 prompt_from_task=True,
@@ -927,7 +927,7 @@ _CONFIGS = [
             action_expert_variant="gemma_300m_lora",
         ),
         data=LeRobotFrankaDataConfig(
-            repo_id="iloveai111/franka_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/data/franka_test",
             assets=AssetsConfig(asset_id="franka_test"),
             base_config=DataConfig(
                 prompt_from_task=True,
