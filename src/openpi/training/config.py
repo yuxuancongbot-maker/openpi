@@ -955,6 +955,32 @@ _CONFIGS = [
         num_train_steps=1_000,
     ),
     #
+    # Fine-tuning Franka RAG configs.
+    #
+    TrainConfig(
+        name="pi05_franka_rag",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=10, discrete_state_input=False),
+        data=LeRobotFrankaDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/franka_rag",
+            assets=AssetsConfig(asset_id="franka_rag"),
+            base_config=DataConfig(
+                prompt_from_task=True,
+            ),
+            use_delta_joint_actions=True,
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=5e-5,
+            decay_steps=1_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        num_train_steps=1_000,
+    ),
+    #
     # Fine-tuning Aloha configs.
     #
     # This is a test config that is used to illustate how train on a custom LeRobot dataset.
