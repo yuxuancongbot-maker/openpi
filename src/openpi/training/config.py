@@ -968,7 +968,7 @@ _CONFIGS = [
             ),
             use_delta_joint_actions=True,
         ),
-        batch_size=256,
+        batch_size=128,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=100,
             peak_lr=5e-5,
@@ -978,7 +978,7 @@ _CONFIGS = [
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
-        num_train_steps=1_000,
+        num_train_steps=2_000,
     ),
     #
     # Fine-tuning Aloha configs.
