@@ -237,6 +237,8 @@ class LeRobotFranka8DDataConfig(DataConfigFactory):
 
     use_delta_joint_actions: bool = True
     extra_delta_transform: bool = False
+    binary_gripper: bool = False
+    gripper_open_threshold: float = 0.5
     action_sequence_keys: Sequence[str] = ("action",)
 
     @override
@@ -256,7 +258,13 @@ class LeRobotFranka8DDataConfig(DataConfigFactory):
         )
 
         data_transforms = _transforms.Group(
-            inputs=[franka_policy_8d.Franka8DInputs(model_type=model_config.model_type)],
+            inputs=[
+                franka_policy_8d.Franka8DInputs(
+                    model_type=model_config.model_type,
+                    binary_gripper=self.binary_gripper,
+                    gripper_open_threshold=self.gripper_open_threshold,
+                )
+            ],
             outputs=[franka_policy_8d.Franka8DOutputs()],
         )
 
@@ -1117,6 +1125,33 @@ _CONFIGS = [
             assets=AssetsConfig(asset_id="pick_rag_100"),
             base_config=DataConfig(prompt_from_task=True),
             use_delta_joint_actions=True,
+        ),
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_pick_rag_100_droid_8d_binary_gripper_low_mem",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_rag_100",
+            assets=AssetsConfig(asset_id="pick_rag_100_binary_gripper"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=True,
+            gripper_open_threshold=0.5,
         ),
         batch_size=32,
         lr_schedule=_optimizer.CosineDecaySchedule(

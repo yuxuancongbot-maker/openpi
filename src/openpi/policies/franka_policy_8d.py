@@ -41,13 +41,23 @@ def _gripper_9d_to_open_scalar(values: np.ndarray) -> np.ndarray:
     return np.clip(width / 0.08, 0.0, 1.0)
 
 
-def _to_8d(values: np.ndarray) -> np.ndarray:
+def _to_8d(
+    values: np.ndarray,
+    *,
+    binary_gripper: bool = False,
+    gripper_open_threshold: float = 0.5,
+) -> np.ndarray:
     values = np.asarray(values, dtype=np.float32)
     if values.shape[-1] == 8:
-        return values
+        result = values.astype(np.float32, copy=True)
+        if binary_gripper:
+            result[..., 7] = (result[..., 7] >= gripper_open_threshold).astype(np.float32)
+        return result
     if values.shape[-1] < 9:
         raise ValueError(f"Expected Franka state/action dim 8 or 9, got {values.shape[-1]}")
     gripper = _gripper_9d_to_open_scalar(values)[..., None]
+    if binary_gripper:
+        gripper = (gripper >= gripper_open_threshold).astype(np.float32)
     return np.concatenate([values[..., :7], gripper], axis=-1).astype(np.float32)
 
 
@@ -64,13 +74,19 @@ class Franka8DInputs(transforms.DataTransformFn):
     """
 
     model_type: _model.ModelType
+    binary_gripper: bool = False
+    gripper_open_threshold: float = 0.5
 
     def __call__(self, data: dict) -> dict:
         base_image = _parse_image(data["observation/image"])
         wrist_image = _parse_image(data["observation/wrist_image"])
 
         inputs = {
-            "state": _to_8d(data["observation/state"]),
+            "state": _to_8d(
+                data["observation/state"],
+                binary_gripper=self.binary_gripper,
+                gripper_open_threshold=self.gripper_open_threshold,
+            ),
             "image": {
                 "base_0_rgb": base_image,
                 "left_wrist_0_rgb": wrist_image,
@@ -84,7 +100,11 @@ class Franka8DInputs(transforms.DataTransformFn):
         }
 
         if "actions" in data:
-            inputs["actions"] = _to_8d(data["actions"])
+            inputs["actions"] = _to_8d(
+                data["actions"],
+                binary_gripper=self.binary_gripper,
+                gripper_open_threshold=self.gripper_open_threshold,
+            )
         if "prompt" in data:
             inputs["prompt"] = data["prompt"]
 
