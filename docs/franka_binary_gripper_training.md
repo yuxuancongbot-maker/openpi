@@ -1,0 +1,150 @@
+# Franka Binary Gripper Training
+
+This note is for the training-side agent/operator.
+
+## Goal
+
+Train a Franka `pick up the rag` policy that learns when to close the gripper from vision/state, instead of relying on deployment-time fixed-step grasp hacks.
+
+The active config is:
+
+```text
+pi05_pick_rag_100_droid_8d_binary_gripper_low_mem
+```
+
+It uses pi0.5 with DROID base, LoRA low-memory variants, 8D Franka actions, and a binary gripper target.
+
+## What Changed
+
+### 8D Franka gripper convention
+
+`src/openpi/policies/franka_policy_8d.py` converts raw Franka 9D data:
+
+```text
+[7 arm joints, finger1, finger2]
+```
+
+to 8D:
+
+```text
+[7 arm joints, gripper_open_scalar]
+```
+
+where:
+
+```text
+gripper_open_scalar = clamp((finger1 + finger2) / 0.08, 0, 1)
+0 = closed
+1 = open
+```
+
+For the binary config, both observation state and action gripper values are thresholded to `0/1`.
+
+### Binary label threshold
+
+The binary training config uses:
+
+```python
+binary_gripper=True
+gripper_open_threshold=0.3
+```
+
+Because `0.3 * 0.08m = 0.024m`, matching the empirically useful close threshold from the dataset/player.
+
+This means:
+
+```text
+width >= 0.024m -> open label 1
+width <  0.024m -> closed label 0
+```
+
+### Gripper loss weighting
+
+pi0.5 uses `action_dim=32`. Our Franka action is 8D and is padded to 32D, so the gripper is only 1 of 32 action dimensions.
+
+The binary gripper config now sets:
+
+```python
+action_loss_weights = (1.0,) * 7 + (8.0,) + (0.0,) * 24
+```
+
+Meaning:
+
+```text
+arm dims 0..6: weight 1
+gripper dim 7: weight 8
+padding dims 8..31: weight 0
+```
+
+The pi0 flow-matching MSE is now optionally weighted per action dimension. Other configs keep `action_loss_weights=None` and use the old loss path.
+
+### Training diagnostics
+
+When `action_loss_weights` is enabled, `scripts/train.py` logs:
+
+```text
+loss             weighted training loss
+loss_unweighted  raw unweighted per-dim flow loss
+loss_arm         raw flow loss on action dims 0..6
+loss_gripper     raw flow loss on action dim 7
+loss_padding     raw flow loss on padded dims 8..31
+```
+
+Watch `loss_gripper`. If it does not decrease, the model is still not learning the close/open decision.
+
+## Compute Norm Stats
+
+Run this on the machine that has the LeRobot dataset path referenced by the config:
+
+```bash
+cd /home/funsun/congyuxuan/franka/openpi
+
+UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/compute_norm_stats.py \
+  --config-name pi05_pick_rag_100_droid_8d_binary_gripper_low_mem
+```
+
+Expected output directory:
+
+```text
+/home/funsun/congyuxuan/franka/openpi/assets/pi05_pick_rag_100_droid_8d_binary_gripper_low_mem/pick_rag_100_binary_gripper/norm_stats.json
+```
+
+If training on another machine, keep the same config and make sure the dataset path in `repo_id` exists there.
+
+## Train
+
+```bash
+cd /home/funsun/congyuxuan/franka/openpi
+
+UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_MEM_FRACTION=0.95 uv run scripts/train.py \
+  pi05_pick_rag_100_droid_8d_binary_gripper_low_mem \
+  --exp_name=pick_rag_100_binary_gripper_lora \
+  --overwrite
+```
+
+## Serve After Training
+
+Replace `/path/to/pick_rag_100_binary_gripper_lora` with the produced checkpoint directory.
+
+```bash
+cd /home/funsun/congyuxuan/franka/openpi
+
+UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/serve_policy.py \
+  --port=8000 policy:checkpoint \
+  --policy.config=pi05_pick_rag_100_droid_8d_binary_gripper_low_mem \
+  --policy.dir=/path/to/pick_rag_100_binary_gripper_lora
+```
+
+## Deployment Note
+
+The robot-side player should use binary gripper execution:
+
+```bash
+--action-dim 8 \
+--binary-gripper \
+--binary-gripper-threshold 0.7 \
+--gripper-mode threshold \
+--grasp-trend-delta 999
+```
+
+Do not use `--force-grasp-step` for final evaluation; that only verifies hardware grasp capability and does not test whether the policy learned grasp timing.
