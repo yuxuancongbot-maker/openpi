@@ -20,6 +20,7 @@ import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.franka_policy as franka_policy
+import openpi.policies.franka_policy_8d as franka_policy_8d
 import openpi.policies.libero_policy as libero_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
@@ -223,6 +224,68 @@ class SimpleDataConfig(DataConfigFactory):
             self.create_base_config(assets_dirs, model_config),
             data_transforms=self.data_transforms(model_config),
             model_transforms=self.model_transforms(model_config),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotFranka8DDataConfig(DataConfigFactory):
+    """Franka LeRobot data config using openpi-franka style 8D action space.
+
+    Dataset can still store 9D [7 joints + 2 finger joints]; Franka8DInputs
+    collapses it to [7 joints + 1 normalized gripper open scalar].
+    """
+
+    use_delta_joint_actions: bool = True
+    extra_delta_transform: bool = False
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/image": "observation.images.cam_high",
+                        "observation/wrist_image": "observation.images.cam_wrist",
+                        "observation/state": "observation.state",
+                        "actions": "action",
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[franka_policy_8d.Franka8DInputs(model_type=model_config.model_type)],
+            outputs=[franka_policy_8d.Franka8DOutputs()],
+        )
+
+        # 8D action: first 7 joints are delta/absolute-converted; gripper scalar stays absolute.
+        delta_action_mask = _transforms.make_bool_mask(7, -1)
+        if self.use_delta_joint_actions:
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+        else:
+            data_transforms = data_transforms.push(
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        if self.extra_delta_transform:
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
         )
 
 
@@ -997,6 +1060,31 @@ _CONFIGS = [
         ema_decay=0.999,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
         num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_pick_rag_100_droid_8d",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_horizon=10,
+            discrete_state_input=False,
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_rag_100",
+            assets=AssetsConfig(asset_id="pick_rag_100"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+        ),
+        batch_size=64,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=5e-5,
+            decay_steps=1_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        num_train_steps=50_000,
     ),
     #
     # Fine-tuning Aloha configs.
