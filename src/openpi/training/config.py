@@ -1064,9 +1064,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_pick_rag_100_droid_8d",
         model=pi0_config.Pi0Config(
-            pi05=True,
-            action_horizon=10,
-            discrete_state_input=False,
+            pi05=True, action_horizon=10, discrete_state_input=False,
         ),
         data=LeRobotFranka8DDataConfig(
             repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_rag_100",
@@ -1076,15 +1074,62 @@ _CONFIGS = [
         ),
         batch_size=64,
         lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=100,
-            peak_lr=5e-5,
-            decay_steps=1_000,
-            decay_lr=5e-5,
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=None,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
         num_train_steps=50_000,
+    ),
+    TrainConfig(
+        name="pi05_pick_rag_100_low_mem",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFrankaDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_rag_100",
+            assets=AssetsConfig(asset_id="pick_rag_100"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+        ),
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_pick_rag_100_droid_8d_low_mem",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_rag_100",
+            assets=AssetsConfig(asset_id="pick_rag_100"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+        ),
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        num_train_steps=10_000,
     ),
     #
     # Fine-tuning Aloha configs.
