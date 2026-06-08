@@ -646,7 +646,7 @@ class TrainConfig:
 
     # Optional per-action-dimension loss weights. If set, the pi0 flow-matching
     # MSE is weighted before averaging over action dimensions.
-    action_loss_weights: Sequence[float] | None = None
+    action_loss_weights: tyro.conf.Suppress[list[float] | None] = None
 
     # Base directory for config assets (e.g., norm stats).
     assets_base_dir: str = "./assets"
@@ -1162,7 +1162,7 @@ _CONFIGS = [
             binary_gripper=True,
             gripper_open_threshold=0.3,
         ),
-        action_loss_weights=(1.0,) * 7 + (8.0,) + (0.0,) * 24,
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
         batch_size=32,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
