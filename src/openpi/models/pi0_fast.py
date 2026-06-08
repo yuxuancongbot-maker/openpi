@@ -196,8 +196,15 @@ class Pi0FAST(_model.BaseModel):
 
     @override
     def compute_loss(
-        self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        actions: _model.Actions,
+        *,
+        train: bool = False,
+        action_loss_weights: at.Float[at.Array, " ad"] | None = None,
     ) -> at.Float[at.Array, "*b ah"]:
+        del action_loss_weights
         observation = _model.preprocess_observation(
             rng, observation, train=train, image_keys=list(observation.images.keys())
         )

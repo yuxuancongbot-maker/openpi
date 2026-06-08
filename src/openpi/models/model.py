@@ -277,6 +277,7 @@ class BaseModel(nnx.Module, abc.ABC):
         actions: Actions,
         *,
         train: bool = False,
+        action_loss_weights: at.Float[ArrayT, " ad"] | None = None,
     ) -> at.Float[at.Array, "*b ah"]: ...
 
     @abc.abstractmethod

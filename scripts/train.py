@@ -147,15 +147,31 @@ def train_step(
     def loss_fn(
         model: _model.BaseModel, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions
     ):
-        chunked_loss = model.compute_loss(rng, observation, actions, train=True)
-        return jnp.mean(chunked_loss)
+        aux = {}
+        if config.action_loss_weights is not None and hasattr(model, "compute_loss_per_dim"):
+            per_dim_loss = model.compute_loss_per_dim(rng, observation, actions, train=True)
+            action_loss_weights = jnp.asarray(config.action_loss_weights, dtype=per_dim_loss.dtype)
+            action_loss_weights = action_loss_weights / jnp.clip(jnp.mean(action_loss_weights), 1e-6)
+            chunked_loss = jnp.mean(per_dim_loss * action_loss_weights, axis=-1)
+            aux = {
+                "loss_unweighted": jnp.mean(per_dim_loss),
+                "loss_arm": jnp.mean(per_dim_loss[..., :7]),
+                "loss_gripper": jnp.mean(per_dim_loss[..., 7]),
+            }
+            if per_dim_loss.shape[-1] > 8:
+                aux["loss_padding"] = jnp.mean(per_dim_loss[..., 8:])
+        else:
+            chunked_loss = model.compute_loss(rng, observation, actions, train=True)
+        return jnp.mean(chunked_loss), aux
 
     train_rng = jax.random.fold_in(rng, state.step)
     observation, actions = batch
 
     # Filter out frozen params.
     diff_state = nnx.DiffState(0, config.trainable_filter)
-    loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
+    (loss, aux), grads = nnx.value_and_grad(loss_fn, argnums=diff_state, has_aux=True)(
+        model, train_rng, observation, actions
+    )
 
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
@@ -188,6 +204,13 @@ def train_step(
         "grad_norm": optax.global_norm(grads),
         "param_norm": optax.global_norm(kernel_params),
     }
+    info.update(aux)
+    if actions.shape[-1] >= 8:
+        # Target magnitude diagnostics; these are not losses.
+        gripper_actions = actions[..., 7]
+        arm_actions = actions[..., :7]
+        info["action_abs_arm_mean"] = jnp.mean(jnp.abs(arm_actions))
+        info["action_abs_gripper_mean"] = jnp.mean(jnp.abs(gripper_actions))
     return new_state, info
 
 

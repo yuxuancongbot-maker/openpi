@@ -187,8 +187,29 @@ class Pi0(_model.BaseModel):
 
     @override
     def compute_loss(
-        self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        actions: _model.Actions,
+        *,
+        train: bool = False,
+        action_loss_weights: at.Float[at.Array, " ad"] | None = None,
     ) -> at.Float[at.Array, "*b ah"]:
+        squared_error = self.compute_loss_per_dim(rng, observation, actions, train=train)
+        if action_loss_weights is None:
+            return jnp.mean(squared_error, axis=-1)
+        weights = jnp.asarray(action_loss_weights, dtype=squared_error.dtype)
+        weights = weights / jnp.clip(jnp.mean(weights), 1e-6)
+        return jnp.mean(squared_error * weights, axis=-1)
+
+    def compute_loss_per_dim(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        actions: _model.Actions,
+        *,
+        train: bool = False,
+    ) -> at.Float[at.Array, "*b ah ad"]:
         preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
         observation = _model.preprocess_observation(preprocess_rng, observation, train=train)
 
@@ -199,7 +220,6 @@ class Pi0(_model.BaseModel):
         x_t = time_expanded * noise + (1 - time_expanded) * actions
         u_t = noise - actions
 
-        # one big forward pass of prefix + suffix at once
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(observation, x_t, time)
         input_mask = jnp.concatenate([prefix_mask, suffix_mask], axis=1)
@@ -211,7 +231,7 @@ class Pi0(_model.BaseModel):
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
-        return jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        return jnp.square(v_t - u_t)
 
     @override
     def sample_actions(

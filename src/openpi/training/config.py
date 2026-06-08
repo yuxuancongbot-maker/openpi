@@ -644,6 +644,10 @@ class TrainConfig:
     # Determines the data to be trained on.
     data: DataConfigFactory = dataclasses.field(default_factory=FakeDataConfig)
 
+    # Optional per-action-dimension loss weights. If set, the pi0 flow-matching
+    # MSE is weighted before averaging over action dimensions.
+    action_loss_weights: Sequence[float] | None = None
+
     # Base directory for config assets (e.g., norm stats).
     assets_base_dir: str = "./assets"
     # Base directory for checkpoints.
@@ -703,6 +707,11 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+        if self.action_loss_weights is not None and len(self.action_loss_weights) != self.model.action_dim:
+            raise ValueError(
+                f"action_loss_weights length ({len(self.action_loss_weights)}) must match "
+                f"model.action_dim ({self.model.action_dim})."
+            )
 
 
 # Use `get_config` if you need to get a config by name in your code.
@@ -1151,8 +1160,9 @@ _CONFIGS = [
             base_config=DataConfig(prompt_from_task=True),
             use_delta_joint_actions=True,
             binary_gripper=True,
-            gripper_open_threshold=0.5,
+            gripper_open_threshold=0.3,
         ),
+        action_loss_weights=(1.0,) * 7 + (8.0,) + (0.0,) * 24,
         batch_size=32,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
