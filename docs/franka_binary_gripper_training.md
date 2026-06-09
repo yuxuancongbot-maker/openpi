@@ -4,15 +4,23 @@ This note is for the training-side agent/operator.
 
 ## Goal
 
-Train a Franka `pick up the rag` policy that learns when to close the gripper from vision/state, instead of relying on deployment-time fixed-step grasp hacks.
+Train a Franka policy that learns when to close the gripper from vision/state, instead of relying on deployment-time fixed-step grasp hacks.
 
-The active config is:
+The active config for the blue-cube-on-plate task is:
+
+```text
+pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem
+```
+
+It uses pi0.5 with DROID base, LoRA low-memory variants, 8D Franka actions, and a binary gripper target.
+
+The older rag config still exists:
 
 ```text
 pi05_pick_rag_100_droid_8d_binary_gripper_low_mem
 ```
 
-It uses pi0.5 with DROID base, LoRA low-memory variants, 8D Franka actions, and a binary gripper target.
+Do not reuse the rag config for the blue cube task. It points at the rag dataset and uses the rag asset id / norm stats.
 
 ## What Changed
 
@@ -42,7 +50,7 @@ For the binary config, both observation state and action gripper values are thre
 
 ### Binary label threshold
 
-The binary training config uses:
+The rag binary training config uses:
 
 ```python
 binary_gripper=True
@@ -57,6 +65,23 @@ This means:
 width >= 0.024m -> open label 1
 width <  0.024m -> closed label 0
 ```
+
+The blue cube dataset has a different measured gripper range. In the current 20-episode dataset:
+
+```text
+finger joint range: 0.0132m .. 0.0388m
+width = finger1 + finger2: 0.0264m .. 0.0775m
+width / 0.08: 0.330 .. 0.969
+```
+
+Therefore, `gripper_open_threshold=0.3` would label every blue-cube frame as open. The blue cube config uses:
+
+```python
+binary_gripper=True
+gripper_open_threshold=0.5
+```
+
+With this dataset, threshold `0.5` produces both open and closed labels, with two open/close transitions per episode.
 
 ### Gripper loss weighting
 
@@ -100,16 +125,28 @@ Run this on the machine that has the LeRobot dataset path referenced by the conf
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/compute_norm_stats.py \
-  --config-name pi05_pick_rag_100_droid_8d_binary_gripper_low_mem
+  --config-name pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem
 ```
 
 Expected output directory:
 
 ```text
-/home/funsun/congyuxuan/franka/openpi/assets/pi05_pick_rag_100_droid_8d_binary_gripper_low_mem/pick_rag_100_binary_gripper/norm_stats.json
+/home/funsun/congyuxuan/franka/openpi/assets/pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem/pick_blue_cube_plate_binary_gripper/norm_stats.json
 ```
 
-If training on another machine, keep the same config and make sure the dataset path in `repo_id` exists there.
+If training on another machine, keep the same config and make sure the dataset path in `repo_id` exists there:
+
+```text
+/home/funsun/franka_ros2_ws/src/lerobot_dataset/pick_up_the_blue_cube_and_put_it_onto_the_plate
+```
+
+If the dataset lives at a different path on the training machine, update `repo_id` in `src/openpi/training/config.py` before computing norm stats.
+
+Do not copy the rag norm stats into the blue cube config. The blue cube config must have its own `asset_id`:
+
+```text
+pick_blue_cube_plate_binary_gripper
+```
 
 ## Train
 
@@ -117,22 +154,22 @@ If training on another machine, keep the same config and make sure the dataset p
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_MEM_FRACTION=0.95 uv run scripts/train.py \
-  pi05_pick_rag_100_droid_8d_binary_gripper_low_mem \
-  --exp_name=pick_rag_100_binary_gripper_lora \
+  pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem \
+  --exp_name=pick_blue_cube_plate_binary_gripper_lora \
   --overwrite
 ```
 
 ## Serve After Training
 
-Replace `/path/to/pick_rag_100_binary_gripper_lora` with the produced checkpoint directory.
+Replace `/path/to/pick_blue_cube_plate_binary_gripper_lora` with the produced checkpoint directory.
 
 ```bash
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/serve_policy.py \
   --port=8000 policy:checkpoint \
-  --policy.config=pi05_pick_rag_100_droid_8d_binary_gripper_low_mem \
-  --policy.dir=/path/to/pick_rag_100_binary_gripper_lora
+  --policy.config=pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem \
+  --policy.dir=/path/to/pick_blue_cube_plate_binary_gripper_lora
 ```
 
 ## Deployment Note
