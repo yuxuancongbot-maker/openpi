@@ -1177,13 +1177,36 @@ _CONFIGS = [
         num_train_steps=10_000,
     ),
     TrainConfig(
+        name="pi05_pick_blue_cube_plate_droid_8d_binary_gripper",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_up_the_blue_cube_and_put_it_onto_the_plate",
+            assets=AssetsConfig(asset_id="pick_blue_cube_plate_binary_gripper"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=True,
+            gripper_open_threshold=0.5,
+        ),
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
         name="pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem",
         model=pi0_config.Pi0Config(
             pi05=True, action_horizon=10, discrete_state_input=False,
             paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
         ),
         data=LeRobotFranka8DDataConfig(
-            repo_id="/home/funsun/franka_ros2_ws/src/lerobot_dataset/pick_up_the_blue_cube_and_put_it_onto_the_plate",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_up_the_blue_cube_and_put_it_onto_the_plate",
             assets=AssetsConfig(asset_id="pick_blue_cube_plate_binary_gripper"),
             base_config=DataConfig(prompt_from_task=True),
             use_delta_joint_actions=True,
