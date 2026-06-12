@@ -1,4 +1,4 @@
-# Franka Binary Gripper Training
+# Franka Continuous Gripper Training
 
 This note is for the training-side agent/operator.
 
@@ -9,10 +9,28 @@ Train a Franka policy that learns when to close the gripper from vision/state, i
 The active config for the blue-cube-on-plate task is:
 
 ```text
+pi05_pick_blue_cube_plate_droid_8d_continuous_gripper_low_mem
+```
+
+It uses pi0.5 with DROID base, LoRA low-memory variants, 8D Franka actions, and a continuous gripper target.
+
+The old blue-cube binary configs still exist only for ablation:
+
+```text
+pi05_pick_blue_cube_plate_droid_8d_binary_gripper
 pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem
 ```
 
-It uses pi0.5 with DROID base, LoRA low-memory variants, 8D Franka actions, and a binary gripper target.
+Do not use them for the next main run. They threshold both gripper state and gripper action during training, which can make the model learn the shortcut `current gripper open -> keep open`.
+
+For the green-plate task, use the newer action-binary variant when testing binary gripper again:
+
+```text
+pi05_green_plate_droid_8d_action_binary_gripper
+pi05_green_plate_droid_8d_action_binary_gripper_low_mem
+```
+
+These configs keep `observation.state[7]` continuous, but train `action[7]` as binary open/closed. This is different from the older binary configs and is intended to avoid the `current gripper state -> copy same state` shortcut.
 
 The older rag config still exists:
 
@@ -46,11 +64,11 @@ gripper_open_scalar = clamp((finger1 + finger2) / 0.08, 0, 1)
 1 = open
 ```
 
-For the binary config, both observation state and action gripper values are thresholded to `0/1`.
+For the active continuous config, observation state and action gripper values stay continuous in `[0, 1]`. This matches the official DROID/OpenPI pattern: train on continuous gripper position, then binarize only when executing on robot hardware.
 
-### Binary label threshold
+### Gripper target
 
-The rag binary training config uses:
+The rag binary training config still uses:
 
 ```python
 binary_gripper=True
@@ -74,7 +92,7 @@ width = finger1 + finger2: 0.0264m .. 0.0775m
 width / 0.08: 0.330 .. 0.969
 ```
 
-Therefore, `gripper_open_threshold=0.3` would label every blue-cube frame as open. The blue cube config uses:
+Therefore, `gripper_open_threshold=0.3` would label every blue-cube frame as open. The old blue-cube binary ablation used:
 
 ```python
 binary_gripper=True
@@ -83,11 +101,45 @@ gripper_open_threshold=0.5
 
 With this dataset, threshold `0.5` produces both open and closed labels, with two open/close transitions per episode.
 
+The active blue-cube config now uses:
+
+```python
+binary_gripper=False
+```
+
+This means:
+
+```text
+training target: continuous gripper_open_scalar
+robot execution: threshold the predicted scalar into open/close
+```
+
+### Action-binary green-plate ablation
+
+The green-plate action-binary config uses:
+
+```python
+binary_gripper=True
+binary_gripper_state=False
+binary_gripper_action=True
+gripper_open_threshold=0.5
+```
+
+This means:
+
+```text
+observation state gripper: continuous width scalar
+training action gripper: binary open/closed label
+execution: binary gripper threshold as before
+```
+
+Use this before collecting a large amount of new data. If it still predicts all-open when the robot is manually placed at a pre-grasp state, the issue is not just continuous-vs-binary; it is likely visual/state distribution or lack of transition-window samples.
+
 ### Gripper loss weighting
 
 pi0.5 uses `action_dim=32`. Our Franka action is 8D and is padded to 32D, so the gripper is only 1 of 32 action dimensions.
 
-The binary gripper config now sets:
+The continuous gripper config keeps the same gripper loss weighting:
 
 ```python
 action_loss_weights = (1.0,) * 7 + (8.0,) + (0.0,) * 24
@@ -125,13 +177,13 @@ Run this on the machine that has the LeRobot dataset path referenced by the conf
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/compute_norm_stats.py \
-  --config-name pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem
+  --config-name pi05_pick_blue_cube_plate_droid_8d_continuous_gripper_low_mem
 ```
 
 Expected output directory:
 
 ```text
-/home/funsun/congyuxuan/franka/openpi/assets/pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem/pick_blue_cube_plate_binary_gripper/norm_stats.json
+/home/funsun/congyuxuan/franka/openpi/assets/pi05_pick_blue_cube_plate_droid_8d_continuous_gripper_low_mem/pick_blue_cube_plate_continuous_gripper/norm_stats.json
 ```
 
 If training on another machine, keep the same config and make sure the dataset path in `repo_id` exists there:
@@ -145,7 +197,7 @@ If the dataset lives at a different path on the training machine, update `repo_i
 Do not copy the rag norm stats into the blue cube config. The blue cube config must have its own `asset_id`:
 
 ```text
-pick_blue_cube_plate_binary_gripper
+pick_blue_cube_plate_continuous_gripper
 ```
 
 ## Train
@@ -154,27 +206,27 @@ pick_blue_cube_plate_binary_gripper
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_MEM_FRACTION=0.95 uv run scripts/train.py \
-  pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem \
-  --exp_name=pick_blue_cube_plate_binary_gripper_lora \
+  pi05_pick_blue_cube_plate_droid_8d_continuous_gripper_low_mem \
+  --exp_name=pick_blue_cube_plate_continuous_gripper_lora \
   --overwrite
 ```
 
 ## Serve After Training
 
-Replace `/path/to/pick_blue_cube_plate_binary_gripper_lora` with the produced checkpoint directory.
+Replace `/path/to/pick_blue_cube_plate_continuous_gripper_lora` with the produced checkpoint directory.
 
 ```bash
 cd /home/funsun/congyuxuan/franka/openpi
 
 UV_CACHE_DIR=/tmp/uv-cache XLA_PYTHON_CLIENT_PREALLOCATE=false uv run scripts/serve_policy.py \
   --port=8000 policy:checkpoint \
-  --policy.config=pi05_pick_blue_cube_plate_droid_8d_binary_gripper_low_mem \
-  --policy.dir=/path/to/pick_blue_cube_plate_binary_gripper_lora
+  --policy.config=pi05_pick_blue_cube_plate_droid_8d_continuous_gripper_low_mem \
+  --policy.dir=/path/to/pick_blue_cube_plate_continuous_gripper_lora
 ```
 
 ## Deployment Note
 
-The robot-side player should use binary gripper execution:
+The robot-side player should still use binary gripper execution. The policy predicts a continuous open scalar, and the player thresholds it into hardware open/close commands:
 
 ```bash
 --action-dim 8 \

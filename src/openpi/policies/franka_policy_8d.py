@@ -75,16 +75,20 @@ class Franka8DInputs(transforms.DataTransformFn):
 
     model_type: _model.ModelType
     binary_gripper: bool = False
+    binary_gripper_state: bool = True
+    binary_gripper_action: bool = True
     gripper_open_threshold: float = 0.5
 
     def __call__(self, data: dict) -> dict:
         base_image = _parse_image(data["observation/image"])
         wrist_image = _parse_image(data["observation/wrist_image"])
+        binary_state = self.binary_gripper and self.binary_gripper_state
+        binary_action = self.binary_gripper and self.binary_gripper_action
 
         inputs = {
             "state": _to_8d(
                 data["observation/state"],
-                binary_gripper=self.binary_gripper,
+                binary_gripper=binary_state,
                 gripper_open_threshold=self.gripper_open_threshold,
             ),
             "image": {
@@ -102,7 +106,7 @@ class Franka8DInputs(transforms.DataTransformFn):
         if "actions" in data:
             inputs["actions"] = _to_8d(
                 data["actions"],
-                binary_gripper=self.binary_gripper,
+                binary_gripper=binary_action,
                 gripper_open_threshold=self.gripper_open_threshold,
             )
         if "prompt" in data:
