@@ -1438,19 +1438,19 @@ _CONFIGS = [
             pi05=True, action_horizon=10, discrete_state_input=False,
         ),
         data=LeRobotFrankaRLinfDataConfig(
-            repo_id="/home/funsun/franka_ros2_ws/src/lerobot_dataset/rlinf_green_plate_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/rlinf_green_plate",
             assets=AssetsConfig(asset_id="green_plate_rlinf_7d"),
             base_config=DataConfig(prompt_from_task=True),
         ),
         action_loss_weights=[1.0] * 6 + [8.0] + [0.0] * 25,
-        batch_size=64,
+        batch_size=16,
         lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+            warmup_steps=100, peak_lr=2e-5, decay_steps=1_000, decay_lr=2e-5,
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
-        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
-        num_train_steps=10_000,
+    weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=2_000_000,
     ),
     TrainConfig(
         name="pi05_green_plate_rlinf_7d_base_lora_low_mem",
@@ -1459,7 +1459,7 @@ _CONFIGS = [
             paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
         ),
         data=LeRobotFrankaRLinfDataConfig(
-            repo_id="/home/funsun/franka_ros2_ws/src/lerobot_dataset/rlinf_green_plate_test",
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/rlinf_green_plate",
             assets=AssetsConfig(asset_id="green_plate_rlinf_7d"),
             base_config=DataConfig(prompt_from_task=True),
         ),
@@ -1475,6 +1475,109 @@ _CONFIGS = [
             paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
         ).get_freeze_filter(),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_green_plate_droid_8d_continuous_gripper_pi05base",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_up_the_blue_cube_and_place_it_onto_the_green_plate",
+            assets=AssetsConfig(asset_id="green_plate_continuous_gripper"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=False,
+        ),
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_green_plate_droid_8d_continuous_gripper_low_mem_pi05base",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/pick_up_the_blue_cube_and_place_it_onto_the_green_plate",
+            assets=AssetsConfig(asset_id="green_plate_continuous_gripper"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=False,
+        ),
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=10_000,
+    ),
+    #
+    # Fine-tuning Franka configs — 200more pick-and-place.
+    #
+    TrainConfig(
+        name="pi05_pickplace_more_200_droid_8d_continuous_gripper",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/franka_pi05_pickplace_more_200",
+            assets=AssetsConfig(asset_id="franka_pi05_pickplace_more_200"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=False,
+        ),
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        # 200 episodes, ~50k frames, batch_size=32 → ~1570 batches/epoch → ~6.4 epochs for 10k steps
+        num_train_steps=10_000,
+    ),
+    TrainConfig(
+        name="pi05_pickplace_more_200_droid_8d_continuous_gripper_low_mem",
+        model=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotFranka8DDataConfig(
+            repo_id="/inspire/hdd/project/inference-chip/lijinhao-240108540148/research_yuxuancong/franka/openpi/data/franka_pi05_pickplace_more_200",
+            assets=AssetsConfig(asset_id="franka_pi05_pickplace_more_200"),
+            base_config=DataConfig(prompt_from_task=True),
+            use_delta_joint_actions=True,
+            binary_gripper=False,
+        ),
+        action_loss_weights=[1.0] * 7 + [8.0] + [0.0] * 24,
+        batch_size=32,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100, peak_lr=5e-5, decay_steps=1_000, decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=None,
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        # 200 episodes, ~50k frames, batch_size=32 → ~1570 batches/epoch → ~6.4 epochs for 10k steps
         num_train_steps=10_000,
     ),
     #
